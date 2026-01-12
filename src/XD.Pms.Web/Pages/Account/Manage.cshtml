@@ -1,0 +1,39 @@
+﻿@page
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.Account.Localization
+@inject IHtmlLocalizer<AccountResource> L
+@model XD.Pms.Web.Pages.Account.ManageModel
+@{
+    Layout = null;
+}
+<abp-script-bundle name="@typeof(Volo.Abp.Account.Web.Pages.Account.ManageModel).FullName" />
+<script>
+    $(document).ready(function () {
+        $('#userManageModal').on('hide.bs.modal', function() {
+            const focused = document.activeElement;
+            if (focused && focused.closest('.modal') === this) {
+                focused.blur();
+            }
+        });
+    });
+</script>
+<abp-modal size="Large" centered="true" scrollable="true" static="false" id="userManageModal">
+    <abp-modal-header title="@L["MyAccount"].Value"></abp-modal-header>
+    <abp-modal-body>
+        <div id="ProfileManagementWrapper">
+            <abp-card>
+                <abp-card-body>
+                    <abp-tabs tab-style="PillVertical" vertical-header-size="_3">
+                        @foreach (var group in Model.ProfileManagementPageCreationContext.Groups)
+                        {
+                            <abp-tab title="@group.DisplayName">
+                                @await Component.InvokeAsync(group.ComponentType, new { parameter = group.Parameter })
+                            </abp-tab>
+                        }
+                    </abp-tabs>
+                </abp-card-body>
+            </abp-card>
+        </div>
+    </abp-modal-body>
+    <abp-modal-footer></abp-modal-footer>
+</abp-modal>

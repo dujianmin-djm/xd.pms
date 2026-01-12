@@ -1,0 +1,138 @@
+﻿@using System.Globalization
+@using XD.Pms.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.Account.Web.Pages.Account
+@using Volo.Abp.AspNetCore.Mvc.UI.Components.LayoutHook
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.PageAlerts
+@using Volo.Abp.AspNetCore.Mvc.UI.Theming
+@using Volo.Abp.AspNetCore.Mvc.UI.Widgets.Components.WidgetScripts
+@using Volo.Abp.AspNetCore.Mvc.UI.Widgets.Components.WidgetStyles
+@using Volo.Abp.Identity
+@using Volo.Abp.Localization
+@using Volo.Abp.Timing
+@using Volo.Abp.Ui.LayoutHooks
+@using Volo.Abp.Ui.Branding
+@inject IBrandingProvider BrandingProvider
+@inject IHtmlLocalizer<PmsResource> L
+@inject IClock Clock
+@{
+    Layout = null;
+    var ticks = Clock.Now.Ticks;
+    var rtl = CultureHelper.IsRtl ? "rtl" : string.Empty;
+    var AppName = BrandingProvider.AppName;
+    var PageName = ViewBag.PageName ?? string.Empty;
+    var currentCultureName = CultureInfo.CurrentCulture.Name;
+}
+<!DOCTYPE html>
+<html lang="@currentCultureName" dir="@rtl">
+<head>
+    @await Component.InvokeLayoutHookAsync(LayoutHooks.Head.First, StandardLayouts.Account)
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@PageName | @AppName</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+    <abp-style-bundle name="@LeptonXLiteThemeBundles.Styles.Global" />
+
+    <style>
+        /* .lpx-login-area {
+            background-color: lightskyblue;
+        } */
+
+        .lpx-login-bg {
+            background-image: url('/images/account/login-bg-img-dim.svg') !important;
+            /* background-image: none !important;
+            background-color: #f5f5f7 !important; */
+        }
+
+        .lpx-logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 0 20px 30px 20px;
+        }
+
+        .lpx-login-brand-text .lpx-brand-logo.lpx-login-logo {
+            background-size: auto 3.6em;
+            height: 3.6em;
+            width: 3.6em;
+            background-position: left;
+        }
+
+        .lpx-brand-name.lpx-login-name {
+            font-size: 36px;
+            display: contents;
+        }
+
+        .footer-link {
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+            .footer-link:hover {
+                color: #70C8FF;
+                text-decoration: underline;
+            }
+
+        .btn-light {
+            --bs-btn-bg: #eee;
+            --bs-btn-border-color: #eee;
+        }
+    </style>
+    @await RenderSectionAsync("styles", false)
+    @await Component.InvokeAsync(typeof(WidgetStylesViewComponent))
+    @await Component.InvokeLayoutHookAsync(LayoutHooks.Head.Last, StandardLayouts.Account)
+</head>
+<body class="abp-account-layout lpx-theme-dim">
+    @await Component.InvokeLayoutHookAsync(LayoutHooks.Body.First, StandardLayouts.Account)
+    <div class="container-fluid p-0" style="overflow-x: hidden">
+        <div class="lpx-login-area">
+            <div class="lpx-login-bg">
+                <div class="d-flex flex-column justify-content-center min-vh-100">
+                    <div class="row">
+                        <div class="col-xxl-5 col-lg-7 col-md-8 col-11 mx-auto position-relative py-4">
+                            <div class="lpx-logo-container lpx-login-brand-text">
+                                <div class="lpx-brand-logo lpx-login-logo"></div>
+                                <div class="lpx-brand-name lpx-login-name" style="color:white">@AppName</div>
+                            </div>
+                            <div class="card mx-auto" style="max-width: 27rem;">
+                                <div class="card-body" style="padding: 2rem 2.25rem 1.75rem 2.25rem;">
+                                    <div class="align-items-start d-flex justify-content-between mb-2">
+                                        <h2 class="lpx-main-title lpx-login-title m-0 me-auto"> @PageName </h2>
+                                        <vc:language-switch></vc:language-switch>
+                                    </div>
+                                    <hr>
+                                    <vc:page-alerts name="Default"></vc:page-alerts>
+                                    @await Component.InvokeLayoutHookAsync(LayoutHooks.PageContent.First, StandardLayouts.Account)
+                                    @RenderBody()
+                                    @await Component.InvokeLayoutHookAsync(LayoutHooks.PageContent.Last, StandardLayouts.Account)
+                                </div>
+                            </div>
+                            <div class="mt-4" style="text-align: center;color: #EEEEEE">
+                                <p class="mt-2">
+                                    © @Clock.Now.Year @L["CopyrightInformation"]
+                                    <a href="https://www.xundiesoft.com/" class="footer-link" target="_blank">@L["AbountUs"] </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <abp-script-bundle name="@LeptonXLiteThemeBundles.Scripts.Global"></abp-script-bundle>
+
+    <script src="/Abp/ApplicationLocalizationScript?cultureName=@currentCultureName"></script>
+    <script src="/Abp/ApplicationConfigurationScript"></script>
+    <script src="/Abp/ServiceProxyScript"></script>
+
+    @await RenderSectionAsync("scripts", required: false)
+    @await Component.InvokeAsync(typeof(WidgetScriptsViewComponent))
+    @await Component.InvokeLayoutHookAsync(LayoutHooks.Body.Last, StandardLayouts.Account)
+</body>
+</html>

@@ -1,0 +1,385 @@
+﻿@using System.Globalization
+@using Volo.Abp.AspNetCore.Mvc.UI.Bundling.TagHelpers
+@using Volo.Abp.AspNetCore.Mvc.UI.Components.LayoutHook
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.Brand
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.BreadCrumbs
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.ContentTitle
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.Menu
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.Toolbar
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.MainToolbar
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.PageAlerts
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.Toolbar.MobileLanguageSwitch
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.Toolbar.MobileUserMenu
+@using Volo.Abp.AspNetCore.Mvc.UI.Theming
+@using Volo.Abp.AspNetCore.Mvc.UI.Widgets.Components.WidgetScripts
+@using Volo.Abp.AspNetCore.Mvc.UI.Widgets.Components.WidgetStyles
+@using Volo.Abp.Localization
+@using Volo.Abp.Ui.Branding
+@using Volo.Abp.Ui.LayoutHooks
+@inject IBrandingProvider BrandingProvider
+@inject IPageLayout PageLayout
+@{
+    Layout = null;
+    var pageTitle = ViewBag.Title == null ? BrandingProvider.AppName : ViewBag.Title;
+    if (PageLayout.Content.Title != null)
+    {
+        if (!string.IsNullOrWhiteSpace(pageTitle))
+        {
+            pageTitle = " | " + pageTitle;
+        }
+        pageTitle = PageLayout.Content.Title + pageTitle;
+    }
+    var rtl = CultureHelper.IsRtl ? "rtl" : string.Empty;
+    var logoUrl = string.IsNullOrEmpty(BrandingProvider.LogoUrl) ? string.Empty
+        : "--lpx-logo: url(" + Url.Content(BrandingProvider.LogoUrl.EnsureStartsWith('/', StringComparison.Ordinal)) + ");";
+}
+<!DOCTYPE html>
+
+<html lang="@CultureInfo.CurrentCulture.Name" dir="@rtl" >
+<head>
+    @await Component.InvokeLayoutHookAsync(LayoutHooks.Head.First, StandardLayouts.Application)
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@pageTitle</title>
+    <link rel="icon" href="~/favicon.svg" type="image/svg+xml">
+
+    <abp-style-bundle name="@LeptonXLiteThemeBundles.Styles.Global" />
+
+    <style>
+        :root {
+            @logoUrl
+            --lpx-topbar-height: 2.3rem;
+            --lpx-content-padding-y: 0.5em;
+        }
+
+        /* .lpx-content .row.lpx-content-toolbar {
+            display: none;
+        } */
+
+        .lpx-content-height {
+            height: calc(100vh - var(--lpx-topbar-height) - 2 * var(--lpx-content-padding-y));
+        }
+
+        .lpx-content-container .lpx-content {
+            padding: var(--lpx-content-padding-y) 1em;
+            margin: 0 auto;
+        }
+
+        .lpx-topbar-container .lpx-topbar {
+            background-color: rgb(39, 111, 245);
+            border-radius: 0px;
+            border: none;
+            height: var(--lpx-topbar-height);
+        }
+
+        .lpx-breadcrumb {
+            font-size: 1.2em;
+            align-items: center;
+            height: 2.3rem;
+        }
+
+        .lpx-breadcrumb-item:hover .lpx-breadcrumb-item-icon, .lpx-breadcrumb-item:hover .lpx-caret {
+            color: whitesmoke; 
+            /* color: #f72585; */
+        }
+
+        .lpx-breadcrumb-item a {
+            font-size: 1.1em;
+            color: white;
+        }
+
+            .lpx-breadcrumb-item a:hover {
+                color: whitesmoke;
+            }
+
+        .lpx-breadcrumb-separator {
+            font-weight: bold;
+            line-height: 32px;
+            width: 0px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .lpx-nav-menu .lpx-menu-item-link {
+            display: flex;
+            width: 100%;
+            cursor: pointer;
+            color: #9198a5;
+            height: 42px;
+            line-height: 42px;
+            transition: color 0.25s ease, background-color 0.3s ease;
+            margin: 1px 0;
+            padding: 0 18px;
+            position: relative;
+        }
+
+        .lpx-sidebar .lpx-logo-container {
+            position: fixed;
+            width: 240px;
+            z-index: 100;
+            background-color: #161616;
+            top: 0;
+        }
+
+            .lpx-sidebar .lpx-logo-container .menu-collapse-icon {
+                position: absolute;
+                left: 205px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.5em;
+                cursor: pointer;
+            }
+
+        .lpx-sidebar-container {
+            min-width: 240px;
+            z-index: 1000;
+            position: fixed;
+            top: 0;
+            height: 100vh;
+        }
+
+            .lpx-sidebar-container .lpx-sidebar .lpx-nav {
+                min-width: 240px;
+                height: 100vh;
+            }
+
+                .lpx-sidebar-container .lpx-sidebar .lpx-nav .lpx-nav-menu {
+                    background-color: #161616;
+                    max-width: 240px;
+                }
+
+        .hover-trigger .lpx-sidebar-container:hover .lpx-sidebar .lpx-nav {
+            min-width: 240px;
+        }
+
+        @@media only screen and (min-width: 768px) and (max-width: 1199px) {
+            .lpx-sidebar-container:not(:hover) .hidden-in-hover-trigger {
+                display: none;
+            }
+
+            .lpx-sidebar-container:not(:hover) .lpx-logo-container {
+                width: 72px;
+            }
+
+            .lpx-sidebar-container:not(:hover) .lpx-brand-logo {
+                background-image: var(--lpx-logo-icon);
+            }
+
+            .lpx-sidebar-container {
+                min-width: 72px;
+            }
+
+                .lpx-sidebar-container .lpx-sidebar .lpx-nav {
+                    min-width: 72px;
+                }
+
+                .lpx-sidebar-container:hover {
+                    min-width: 72px;
+                }
+
+                    .lpx-sidebar-container:hover .lpx-sidebar .lpx-nav {
+                        min-width: 240px;
+                    }
+        }
+
+        @@media only screen and (min-width: 1200px) {
+            .lpx-content-container {
+                margin-left: 240px;
+            }
+        }
+
+        .lpx-footbar-container {
+            flex-wrap: wrap;
+            padding: 0;
+            background-color: #161616;
+            z-index: 101;
+            position: fixed;
+            bottom: 0;
+            top: inherit;
+            right: 72px;
+            left: 240px;
+            box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.02);
+        }
+
+        .btn-primary {
+            --bs-btn-bg: rgb(39, 111, 245);
+        }
+
+        /* .btn-light {
+            --bs-btn-bg: lightgrey;
+        } */
+
+        .btn-success {
+            --bs-btn-bg: #00b559;
+        }
+
+        .btn-danger {
+            --bs-btn-bg: #e42c41;
+        }
+
+        .nav-tabs {
+            margin-bottom: 0.5rem !important;
+        }
+
+            .nav-tabs .nav-item .nav-link.active {
+                border-bottom: 3px solid rgb(39, 111, 245);
+            }
+
+            .nav-tabs .nav-link {
+                padding: 0.25rem 0;
+            }
+
+                .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+                    color: cornflowerblue;
+                }
+
+        .tab-content {
+            padding: 0.5rem;
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+        }
+
+        .offcanvas-header {
+            padding: 1rem 1.5rem;
+        }
+
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: black;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-right: 12px;
+            color: white;
+        }
+
+        .user-name {
+            font-size: 1.0em;
+            font-weight: 500;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+
+    @await Component.InvokeAsync(typeof(WidgetStylesViewComponent))
+    @await RenderSectionAsync("styles", false)
+    @await Component.InvokeLayoutHookAsync(LayoutHooks.Head.Last, StandardLayouts.Application)
+</head>
+<body class="abp-application-layout @rtl">
+    @await Component.InvokeLayoutHookAsync(LayoutHooks.Body.First, StandardLayouts.Application)
+
+    <div class="lpx-scroll-container">
+        <div id="lpx-wrapper" class="hover-trigger">
+            <div class="lpx-mobile-navbar-container">
+                <header class="lpx-mobile-navbar">
+                    <div class="lpx-logo-container">
+                        @await Component.InvokeAsync(typeof(MainNavbarBrandViewComponent))
+                    </div>
+                    <div class="user-menu">
+                        <i class="lpx-icon bi bi-person lpx-toggle" data-lpx-toggle="mobile-user-menu-group" aria-hidden="true"></i>
+                        <i class="lpx-icon bi bi-list lpx-toggle" data-lpx-toggle="mobile-navbar" aria-hidden="true"></i>
+                    </div>
+                </header>
+                <div class="user-menu-groups d-none" id="mobile-user-menu-group">
+                    @await Component.InvokeAsync(typeof(MobileLanguageSwitchViewComponent))
+                    @await Component.InvokeAsync(typeof(MobileUserMenuViewComponent))
+                </div>
+                <nav class="lpx-mobile-nav-items d-none" id="mobile-navbar">
+                    <ul class="lpx-nav-menu" id="mobile-sidebar">
+                        @await Component.InvokeAsync(typeof(MainMenuViewComponent))
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="lpx-sidebar-container">
+                <div class="lpx-sidebar lpx-scroll-container" id="lpx-sidebar">
+                    <nav class="lpx-nav">
+                        <div class="lpx-logo-container">
+                            @await Component.InvokeAsync(typeof(MainNavbarBrandViewComponent))
+                            <i class="lpx-icon bi bi-filter-left menu-collapse-icon hidden-in-hover-trigger" aria-hidden="true" data-lpx-toggle="sidebar"></i>
+                        </div>
+                        <ul class="lpx-nav-menu" id="desktop-sidebar">
+                            @await Component.InvokeAsync(typeof(MainMenuViewComponent))
+                        </ul>
+                    </nav>
+                    @* <div class="lpx-sidebar-footer mb-1">
+                        © KD
+                    </div> *@
+                </div>
+            </div>
+            
+            <div class="lpx-content-container">
+                <div class="lpx-topbar-container">
+                    <div class="lpx-topbar">
+                        <nav aria-label="breadcrumb" class="lpx-breadcrumb-container">
+                            <ol class="lpx-breadcrumb">
+                                @await Component.InvokeAsync(typeof(BreadCrumbsViewComponent))
+                            </ol>
+                        </nav>
+                        <div class="lpx-topbar-content">
+                            @await Component.InvokeAsync(typeof(ToolbarItemsViewComponent))
+                        </div>
+                    </div>
+                </div>
+                <div class="lpx-content">
+                    @await Component.InvokeAsync(typeof(PageAlertsViewComponent))
+                    <div class="row lpx-content-toolbar">
+                        <div class="col">
+                            @await Component.InvokeAsync(typeof(ContentTitleViewComponent))
+                        </div>
+                        <div class="col-auto d-flex justify-content-end my-2" id="AbpContentToolbar">
+                            @await RenderSectionAsync("content_toolbar", false)
+                        </div>
+                    </div>
+                    @await Component.InvokeLayoutHookAsync(LayoutHooks.PageContent.First, StandardLayouts.Application)
+                    @RenderBody()
+                    @await Component.InvokeLayoutHookAsync(LayoutHooks.PageContent.Last, StandardLayouts.Application)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <abp-script-bundle name="@LeptonXLiteThemeBundles.Scripts.Global" />
+
+    <script src="~/Abp/ApplicationLocalizationScript?cultureName=@CultureInfo.CurrentUICulture.Name"></script>
+    <script src="~/Abp/ApplicationConfigurationScript"></script>
+    <script src="~/Abp/ServiceProxyScript"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedValue = localStorage.getItem('lpx:side-menu-state');
+            if (storedValue === null) {
+                localStorage.setItem('lpx:side-menu-state', '1');
+            }
+            const sidebarWrapper = document.getElementById('lpx-wrapper');
+            const isCollapsed = localStorage.getItem('lpx:side-menu-state') === '1';
+            sidebarWrapper.classList.toggle('hover-trigger', isCollapsed);
+            document.querySelector('[data-lpx-toggle="sidebar"]').addEventListener('click', function() {
+                localStorage.setItem('lpx:side-menu-state', sidebarWrapper.classList.contains('hover-trigger') ? '1' : '');
+            });
+        });
+    </script>
+
+    @await Component.InvokeAsync(typeof(WidgetScriptsViewComponent))
+    @await RenderSectionAsync("scripts", false)
+    @await Component.InvokeLayoutHookAsync(LayoutHooks.Body.Last, StandardLayouts.Application)
+</body>
+</html>

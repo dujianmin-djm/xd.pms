@@ -1,0 +1,61 @@
+.dropdown-menu {
+    min-width: 150px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+    padding: 8px 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .dropdown-item:hover {
+        background-color: #0056ff40;
+    }
+
+    .dropdown-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+div:where(.swal2-icon) {
+    margin: 2em auto .1em !important;
+}
+
+.form-check-input:checked {
+    border-color: cornflowerblue !important;
+    background-color: cornflowerblue !important;
+}
+
+.abp-block-area.abp-block-area-busy:before {
+    content: "";
+    display: block;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border-width: 2px;
+    border-style: solid;
+    border-color: transparent #228ae6 #228ae6 #228ae6;
+    position: absolute;
+    top: calc(50% - 60px);
+    left: calc(50% - 60px);
+    will-change: transform;
+    animation: spin .75s infinite ease-in-out;
+}
+
+:root {
+    /*--lpx-brand: #f72585;*/
+    --lpx-brand: rgb(39, 111, 245);
+    --lpx-primary: #355dff;
+    --lpx-secondary: #6c5dd3;
+    --lpx-success: #4fbf67;
+    --lpx-light: #eeeeee;
+    --lpx-info: #438aa7;
+    --lpx-danger: #c00d49;
+    --lpx-warning: #ff9f38;
+    --lpx-logo: url('/images/logo/leptonxlite/logo-light-thumbnail.png');
+    --lpx-logo-icon: url('/favicon.svg');
+}

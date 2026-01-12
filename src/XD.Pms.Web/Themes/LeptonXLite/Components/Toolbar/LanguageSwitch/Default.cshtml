@@ -1,0 +1,24 @@
+﻿@using System.Linq
+@using Microsoft.AspNetCore.Http.Extensions
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Languages
+@using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Themes.LeptonXLite.Components.Toolbar.LanguageSwitch
+@model ThemeLanguageInfo
+@{
+    var returnPath = System.Net.WebUtility.UrlEncode(Context.Request.GetEncodedPathAndQuery());
+}
+@if (Model.HasLanguages)
+{
+    <div class="dropdown btn-group ms-auto" aria-labelledby="languageDropdown">
+        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-translate me-1"></i> @Model.CurrentLanguage.DisplayName
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            @foreach (var language in Model.Languages.Where(x => !x.CultureName.Equals(Model.CurrentLanguage.CultureName)))
+            {
+                <li>
+                    <a class="dropdown-item" href="/Abp/Languages/Switch?culture=@language.CultureName&amp;uiCulture=@language.UiCultureName&amp;returnUrl=@returnPath" data-lpx-language-option="@language.TwoLetterISOLanguageName">@language.DisplayName / @language.TwoLetterISOLanguageName.ToUpper()</a>
+                </li>
+            }
+        </ul>
+    </div>
+}

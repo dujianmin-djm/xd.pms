@@ -1,0 +1,12 @@
+﻿@using Volo.Abp.AspNetCore.Mvc.UI.Theming
+@inject IThemeManager ThemeManager
+@{
+    Layout = ThemeManager.CurrentTheme.GetAccountLayout();
+}
+@section Styles {
+    @await RenderSectionAsync("styles", false)
+}
+@RenderBody()
+@section Scripts {
+    @await RenderSectionAsync("scripts", false)
+}

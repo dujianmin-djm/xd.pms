@@ -1,0 +1,105 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.LeptonXLiteTheme": {
+      "version": "5.0.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.Account": {
+      "version": "10.0.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "10.0.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.Identity": {
+      "version": "10.0.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "9.3.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "10.0.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "10.0.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "10.0.2",
+      "isInstalled": true
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "XD.Xmgl.Application": {
+      "path": "src/XD.Xmgl.Application/XD.Xmgl.Application.abppkg",
+      "folder": "src"
+    },
+    "XD.Xmgl.Application.Tests": {
+      "path": "test/XD.Xmgl.Application.Tests/XD.Xmgl.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "XD.Xmgl.Domain.Shared": {
+      "path": "src/XD.Xmgl.Domain.Shared/XD.Xmgl.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "XD.Xmgl.Application.Contracts": {
+      "path": "src/XD.Xmgl.Application.Contracts/XD.Xmgl.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "XD.Xmgl.HttpApi": {
+      "path": "src/XD.Xmgl.HttpApi/XD.Xmgl.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "XD.Xmgl.HttpApi.Client": {
+      "path": "src/XD.Xmgl.HttpApi.Client/XD.Xmgl.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "XD.Xmgl.Web": {
+      "path": "src/XD.Xmgl.Web/XD.Xmgl.Web.abppkg",
+      "folder": "src"
+    },
+    "XD.Xmgl.Web.Tests": {
+      "path": "test/XD.Xmgl.Web.Tests/XD.Xmgl.Web.Tests.abppkg",
+      "folder": "test"
+    },
+    "XD.Xmgl.EntityFrameworkCore.Tests": {
+      "path": "test/XD.Xmgl.EntityFrameworkCore.Tests/XD.Xmgl.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "XD.Xmgl.EntityFrameworkCore": {
+      "path": "src/XD.Xmgl.EntityFrameworkCore/XD.Xmgl.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "XD.Xmgl.TestBase": {
+      "path": "test/XD.Xmgl.TestBase/XD.Xmgl.TestBase.abppkg",
+      "folder": "test"
+    },
+    "XD.Xmgl.Domain.Tests": {
+      "path": "test/XD.Xmgl.Domain.Tests/XD.Xmgl.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "XD.Xmgl.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/XD.Xmgl.HttpApi.Client.ConsoleTestApp/XD.Xmgl.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "XD.Xmgl.DbMigrator": {
+      "path": "src/XD.Xmgl.DbMigrator/XD.Xmgl.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "XD.Xmgl.Domain": {
+      "path": "src/XD.Xmgl.Domain/XD.Xmgl.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}
