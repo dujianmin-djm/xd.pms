@@ -2,6 +2,8 @@
   "culture": "zh-Hans",
   "texts": {
     "AppName": "项目管理系统",
+    "Menu:Pms": "Book Store",
+    "Menu:Books": "书籍",
     "Menu:Home": "首页",
     "Menu:ContactUs": "联系我们",
     "Menu:ArticleSample": "文章示例",

@@ -254,17 +254,17 @@ paket-files/
 # ABP Studio
 **/.abpstudio/
 
-# Xmgl
-src/XD.Xmgl.Web/Logs/*
-src/XD.Xmgl.Web.Host/Logs/*
-src/XD.Xmgl.Web.Public/Logs/*
-src/XD.Xmgl.Web.Public.Host/Logs/*
-src/XD.Xmgl.AuthServer/Logs/*
-src/XD.Xmgl.HttpApi.Host/Logs/*
-src/XD.Xmgl.HttpApi.HostWithIds/Logs/*
-src/XD.Xmgl.DbMigrator/Logs/*
-src/XD.Xmgl.Blazor.Server/Logs/*
-src/XD.Xmgl.Blazor.Server.Tiered/Logs/*
+# Pms
+src/XD.Pms.Web/Logs/*
+src/XD.Pms.Web.Host/Logs/*
+src/XD.Pms.Web.Public/Logs/*
+src/XD.Pms.Web.Public.Host/Logs/*
+src/XD.Pms.AuthServer/Logs/*
+src/XD.Pms.HttpApi.Host/Logs/*
+src/XD.Pms.HttpApi.HostWithIds/Logs/*
+src/XD.Pms.DbMigrator/Logs/*
+src/XD.Pms.Blazor.Server/Logs/*
+src/XD.Pms.Blazor.Server.Tiered/Logs/*
 
 # Use abp install-libs to restore.
 **/wwwroot/libs/*

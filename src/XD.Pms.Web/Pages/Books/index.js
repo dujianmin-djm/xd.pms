@@ -3,6 +3,9 @@
     var createModal = new abp.ModalManager(abp.appPath + 'Books/CreateModal');
     var editModal = new abp.ModalManager(abp.appPath + 'Books/EditModal');
 
+    var bookApi = xD.pms.books.book;
+    //console.log('Books API proxy:', bookApi);
+
     var dataTable = $('#BooksTable').DataTable(
         abp.libs.datatables.normalizeConfiguration({
             serverSide: true,
@@ -10,7 +13,7 @@
             order: [[1, "asc"]],
             searching: false,
             scrollX: true,
-            ajax: abp.libs.datatables.createAjax(xD.Pms.books.book.getList),
+            ajax: abp.libs.datatables.createAjax(bookApi.getList),
             columnDefs: [
                 {
                     title: l('Actions'),
@@ -31,8 +34,7 @@
                                         return l('BookDeletionConfirmationMessage', data.record.name);
                                     },
                                     action: function (data) {
-                                        xD.Pms.books.book
-                                            .delete(data.record.id)
+                                        bookApi.delete(data.record.id)
                                             .then(function() {
                                                 abp.notify.info(l('SuccessfullyDeleted'));
                                                 dataTable.ajax.reload();
@@ -78,7 +80,7 @@
         dataTable.ajax.reload();
     });
 
-    $('#NewBookButton').click(function (e) {
+    $('#NewBookButton').on('click', function (e) {
         e.preventDefault();
         createModal.open();
     });

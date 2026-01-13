@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Server.AspNetCore;
@@ -28,7 +30,6 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Toolbars;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
-using Volo.Abp.AutoMapper;
 using Volo.Abp.BackgroundWorkers;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity.Web;
@@ -97,9 +98,26 @@ public class PmsWebModule : AbpModule
                 options.AddDevelopmentEncryptionAndSigningCertificate = false;
             });
 
-            PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
-            {
-                serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", configuration["AuthServer:CertificatePassPhrase"]!);
+			// 配置 OpenIddict 服务端
+			PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
+			{
+                // 启用 Password Grant（用于前端直接登录）
+				serverBuilder.AllowPasswordFlow();
+
+				// 启用 Refresh Token
+				serverBuilder.AllowRefreshTokenFlow();
+
+				// 启用 Client Credentials 客户端凭证（服务间调用，微服务间调用、定时任务）
+				serverBuilder.AllowClientCredentialsFlow();
+
+				// 设置 Token 有效期
+				serverBuilder.SetAccessTokenLifetime(TimeSpan.FromMinutes(30));
+				serverBuilder.SetRefreshTokenLifetime(TimeSpan.FromDays(7));
+
+				// 开发环境禁用 HTTPS 要求（生产环境必须启用）
+				serverBuilder.UseAspNetCore().DisableTransportSecurityRequirement();
+
+				serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", configuration["AuthServer:CertificatePassPhrase"]!);
                 serverBuilder.SetIssuer(new Uri(configuration["AuthServer:Authority"]!));
             });
         }
@@ -112,8 +130,8 @@ public class PmsWebModule : AbpModule
 
         if (!configuration.GetValue<bool>("App:DisablePII"))
         {
-            Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
-            Microsoft.IdentityModel.Logging.IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.LogCompleteSecurityArtifact = true;
         }
 
         if (!configuration.GetValue<bool>("AuthServer:RequireHttpsMetadata"))
@@ -133,7 +151,6 @@ public class PmsWebModule : AbpModule
         ConfigureUrls(configuration);
         ConfigureHealthChecks(context);
         ConfigureAuthentication(context);
-        ConfigureAutoMapper();
         ConfigureVirtualFileSystem(hostingEnvironment);
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
@@ -157,7 +174,7 @@ public class PmsWebModule : AbpModule
 		ConfigureJwtSettings(context, configuration);
 
 		// 配置 JWT 认证
-		ConfigureJwtAuthentication(context, configuration);
+		//ConfigureJwtAuthentication(context, configuration);
 
 
 		//Configure<AbpAntiForgeryOptions>(options =>
@@ -178,9 +195,15 @@ public class PmsWebModule : AbpModule
 
 		context.Services.AddAuthentication(options =>
 		{
-			options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-			options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-			options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+			// 把默认认证方案改成了 JwtBearer（DefaultAuthenticate / Challenge / Scheme 都指向 JWT）。
+			// 这会把整个应用（包括 Razor Pages UI）默认的认证方式改为 Bearer Token。
+
+			//options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+			//options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+			//options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+
+			// 取消把应用的默认认证方案强制设为 JWT。保留框架 / Identity / OpenIddict 为默认（用于交互式登录和 Cookie）
+            // 只注册 JwtBearer 用于 API / SignalR 场景。
 		})
 		.AddJwtBearer(options =>
 		{
@@ -267,14 +290,6 @@ public class PmsWebModule : AbpModule
         context.Services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
         {
             options.IsDynamicClaimsEnabled = true;
-        });
-    }
-
-    private void ConfigureAutoMapper()
-    {
-        Configure<AbpAutoMapperOptions>(options =>
-        {
-            options.AddMaps<PmsWebModule>();
         });
     }
 

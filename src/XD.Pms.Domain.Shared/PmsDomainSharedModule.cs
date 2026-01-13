@@ -43,7 +43,7 @@ public class PmsDomainSharedModule : AbpModule
         Configure<AbpLocalizationOptions>(options =>
         {
             options.Resources
-                .Add<PmsResource>("en")
+                .Add<PmsResource>("zh-Hans")
                 .AddBaseTypes(typeof(AbpValidationResource))
                 .AddVirtualJson("/Localization/Pms");
 

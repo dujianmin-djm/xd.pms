@@ -51,8 +51,7 @@ public class PmsDbContext : AbpDbContext<PmsDbContext>, IIdentityDbContext
 
     #endregion
 
-    public PmsDbContext(DbContextOptions<PmsDbContext> options)
-        : base(options)
+    public PmsDbContext(DbContextOptions<PmsDbContext> options) : base(options)
     {
 
     }
@@ -90,19 +89,10 @@ public class PmsDbContext : AbpDbContext<PmsDbContext>, IIdentityDbContext
 			b.ConfigureByConvention();
 
 			b.HasKey(x => x.Id);
-
-			b.Property(x => x.Token)
-				.IsRequired()
-				.HasMaxLength(AuthenticationConsts.RefreshTokenMaxLength);
-
-			b.Property(x => x.DeviceId)
-				.HasMaxLength(AuthenticationConsts.DeviceIdMaxLength);
-
-			b.Property(x => x.UserAgent)
-				.HasMaxLength(AuthenticationConsts.ClientInfoMaxLength);
-
-			b.Property(x => x.ClientIp)
-				.HasMaxLength(64);
+			b.Property(x => x.Token).IsRequired().HasMaxLength(AuthenticationConsts.RefreshTokenMaxLength);
+			b.Property(x => x.DeviceId).HasMaxLength(AuthenticationConsts.DeviceIdMaxLength);
+			b.Property(x => x.UserAgent).HasMaxLength(AuthenticationConsts.ClientInfoMaxLength);
+			b.Property(x => x.ClientIp).HasMaxLength(64);
 
 			// Ë÷Òý
 			b.HasIndex(x => x.Token).IsUnique();

@@ -2,9 +2,6 @@ using System;
 
 namespace XD.Pms.Authentication;
 
-/// <summary>
-/// JWT Token 生成结果
-/// </summary>
 public class JwtTokenResult
 {
 	public string AccessToken { get; set; } = default!;

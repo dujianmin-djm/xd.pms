@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using static Volo.Abp.Emailing.EmailSettingNames;
 
 namespace XD.Pms.Web.HealthChecks;
 
@@ -29,7 +28,7 @@ public static class HealthChecksBuilderExtensions
 
         var healthChecksUiBuilder = services.AddHealthChecksUI(settings =>
         {
-			settings.SetEvaluationTimeInSeconds(60);        // 每60秒检查一次
+			settings.SetEvaluationTimeInSeconds(600);       // 每60秒检查一次
 			settings.MaximumHistoryEntriesPerEndpoint(50);  // 最大历史记录
 			settings.SetApiMaxActiveRequests(1);            // 并发请求数
 

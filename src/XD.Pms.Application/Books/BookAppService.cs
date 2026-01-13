@@ -32,9 +32,7 @@ public class BookAppService : PmsAppService, IBookAppService
 			//.WhereIf(!input.Filter.IsNullOrWhiteSpace(), book => book.Name.Contains(input.Filter));
         var query = queryable
 			.OrderBy(input.Sorting.IsNullOrWhiteSpace() ? "Name" : input.Sorting)
-			//.PageBy(input.SkipCount, input.MaxResultCount)
-			.Skip(input.SkipCount)
-            .Take(input.MaxResultCount);
+			.PageBy(input.SkipCount, input.MaxResultCount);
 
         var books = await AsyncExecuter.ToListAsync(query);
 		var totalCount = await AsyncExecuter.CountAsync(queryable);
