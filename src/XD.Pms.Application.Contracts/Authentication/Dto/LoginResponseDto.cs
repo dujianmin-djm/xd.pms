@@ -2,6 +2,9 @@ using System;
 
 namespace XD.Pms.Authentication.Dto;
 
+/// <summary>
+/// 登录响应
+/// </summary>
 public class LoginResponseDto
 {
 	/// <summary>
@@ -35,18 +38,12 @@ public class LoginResponseDto
 	public DateTime RefreshTokenExpiration { get; set; }
 
 	/// <summary>
+	/// 权限范围
+	/// </summary>
+	public string? Scope { get; set; }
+
+	/// <summary>
 	/// 用户信息
 	/// </summary>
 	public UserInfoDto User { get; set; } = default!;
-}
-
-public class UserInfoDto
-{
-	public Guid Id { get; set; }
-	public string UserName { get; set; } = default!;
-	public string? Email { get; set; }
-	public string? Name { get; set; }
-	public string? Surname { get; set; }
-	public string? PhoneNumber { get; set; }
-	public string[] Roles { get; set; } = [];
 }

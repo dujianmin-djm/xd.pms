@@ -15,11 +15,12 @@ public class BookDataSeederContributor : IDataSeedContributor, ITransientDepende
         _bookRepository = bookRepository;
 	}
 
-    /// <summary>
-    /// 当运行应用程序时，ABP框架会自动调用所有实现了 IDataSeedContributor 的类的 SeedAsync 方法。
-    /// 如果使用ABP的数据库迁移功能（运行 DbMigrator 项目），数据种子也会被执行。
-    /// </summary>
-    public async Task SeedAsync(DataSeedContext context)
+	/// <summary>
+	/// 当运行应用程序时，ABP框架会自动调用所有实现了 IDataSeedContributor 的类的 SeedAsync 方法。
+	/// 如果使用ABP的数据库迁移功能（运行 DbMigrator 项目），数据种子会被执行。
+	/// 或 IDataSeeder.SeedAsync 方法被手动调用时，数据种子也会被执行。
+	/// </summary>
+	public async Task SeedAsync(DataSeedContext context)
     {
         if (await _bookRepository.GetCountAsync() <= 0)
         {

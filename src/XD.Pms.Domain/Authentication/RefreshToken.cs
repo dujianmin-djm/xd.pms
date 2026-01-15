@@ -4,9 +4,6 @@ using Volo.Abp.MultiTenancy;
 
 namespace XD.Pms.Authentication;
 
-/// <summary>
-/// Refresh Token 实体
-/// </summary>
 public class RefreshToken : CreationAuditedEntity<Guid>, IMultiTenant
 {
     /// <summary>
@@ -57,7 +54,7 @@ public class RefreshToken : CreationAuditedEntity<Guid>, IMultiTenant
     /// <summary>
     /// Token类型
     /// </summary>
-    public TokenType TokenType { get; private set; }
+    public string? TokenType { get; private set; } = "Web";
     
     /// <summary>
     /// 租户ID
@@ -67,14 +64,14 @@ public class RefreshToken : CreationAuditedEntity<Guid>, IMultiTenant
 	/// <summary>
 	/// 是否有效（未过期且未撤销）
 	/// </summary>
-	public bool IsActive => !IsRevoked && ExpiresAt > DateTimeOffset.Now;
+	public bool IsActive => !IsRevoked && ExpiresAt > DateTime.Now;
     
     public RefreshToken(
         Guid id,
         Guid userId,
         string token,
         DateTime expiresAt,
-        TokenType tokenType,
+        string? tokenType,
 		string? clientIp = null,
         string? userAgent = null,
         string? deviceId = null,

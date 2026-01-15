@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp;
+using XD.Pms.ApiResponse;
 using XD.Pms.Authentication;
 using XD.Pms.Authentication.Dto;
 
@@ -14,80 +13,71 @@ namespace XD.Pms.Controllers;
 [RemoteService(Name = "Default")]
 public class AuthController : PmsControllerBase
 {
-	private readonly IAuthAppService _authAppService;
+	private readonly ITokenAppService _tokenAppService;
 
-	public AuthController(IAuthAppService authAppService)
+	public AuthController(ITokenAppService tokenAppService)
 	{
-		_authAppService = authAppService;
+		_tokenAppService = tokenAppService;
 	}
 
 	/// <summary>
 	/// 用户登录
 	/// </summary>
+	/// <remarks>
+	/// 使用用户名/邮箱和密码登录，获取访问令牌和刷新令牌。示例请求:
+	/// {
+	///     "userName": "admin",
+	///     "password": "1q2w3E*"
+	/// }
+	/// </remarks>
 	/// <param name="input">登录信息</param>
-	/// <returns>令牌信息</returns>
+	/// <returns>令牌信息和用户信息</returns>
 	[HttpPost("login")]
 	[AllowAnonymous]
-	public async Task<ActionResult<LoginResponseDto>> LoginAsync([FromBody] LoginRequestDto input)
+	public async Task<ActionResult<ApiResponse<LoginResponseDto>>> LoginAsync([FromBody] LoginRequestDto input)
 	{
-		var result = await _authAppService.LoginAsync(input);
-		return Ok(result);
+		var result = await _tokenAppService.LoginAsync(input);
+		return Ok(ApiResponse<LoginResponseDto>.Success(result, "登录成功"));
 	}
 
 	/// <summary>
 	/// 刷新令牌
 	/// </summary>
+	/// <remarks>
+	/// 使用刷新令牌获取新的访问令牌。示例请求:
+	/// {
+	///     "refreshToken": "your-refresh-token"
+	/// }
+	/// </remarks>
 	/// <param name="input">刷新令牌</param>
-	/// <returns>新令牌</returns>
+	/// <returns>新的令牌信息</returns>
 	[HttpPost("refresh")]
 	[AllowAnonymous]
-	public async Task<ActionResult<TokenResponseDto>> RefreshTokenAsync([FromBody] RefreshTokenRequestDto input)
+	public async Task<ApiResponse<TokenResponseDto>> RefreshTokenAsync([FromBody] RefreshTokenRequestDto input)
 	{
-		var result = await _authAppService.RefreshTokenAsync(input);
-		return Ok(result);
+		var result = await _tokenAppService.RefreshTokenAsync(input);
+		return ApiResponse<TokenResponseDto>.Success(result, "令牌刷新成功");
 	}
 
 	/// <summary>
-	/// 登出（撤销令牌）
+	/// 登出（撤销令牌），撤销当前访问令牌，使其失效
 	/// </summary>
 	[HttpPost("logout")]
 	[Authorize]
-	public async Task<ActionResult> LogoutAsync([FromBody] RevokeTokenRequestDto? input)
+	public async Task<ApiResponse<object>> LogoutAsync()
 	{
-		await _authAppService.RevokeTokenAsync(input ?? new RevokeTokenRequestDto());
-		return Ok(new { message = "登出成功" });
+		await _tokenAppService.RevokeTokenAsync();
+		return ApiResponse<object>.Success(null, "登出成功");
 	}
 
 	/// <summary>
 	/// 获取当前用户信息
 	/// </summary>
-	[HttpGet("current-user")]
+	[HttpGet("user-info")]
 	[Authorize]
-	public async Task<ActionResult<UserInfoDto>> GetCurrentUserAsync()
+	public async Task<ApiResponse<UserInfoDto>> GetUserInfoAsync()
 	{
-		var result = await _authAppService.GetCurrentUserAsync();
-		return Ok(result);
-	}
-
-	/// <summary>
-	/// 获取用户活跃会话列表
-	/// </summary>
-	[HttpGet("sessions")]
-	[Authorize]
-	public async Task<ActionResult<List<UserSessionDto>>> GetActiveSessionsAsync()
-	{
-		var result = await _authAppService.GetActiveSessionsAsync();
-		return Ok(result);
-	}
-
-	/// <summary>
-	/// 撤销指定会话
-	/// </summary>
-	[HttpDelete("sessions/{tokenId}")]
-	[Authorize]
-	public async Task<ActionResult> RevokeSessionAsync(Guid tokenId)
-	{
-		await _authAppService.RevokeSessionAsync(tokenId);
-		return Ok(new { success = true, message = "会话已撤销" });
+		var result = await _tokenAppService.GetCurrentUserInfoAsync();
+		return ApiResponse<UserInfoDto>.Success(result);
 	}
 }

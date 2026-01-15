@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace XD.Pms.Authentication.Dto;
 
+/// <summary>
+/// 登录请求
+/// </summary>
 public class LoginRequestDto
 {
 	/// <summary>
@@ -19,20 +22,12 @@ public class LoginRequestDto
 	public string Password { get; set; } = default!;
 
 	/// <summary>
-	/// 设备标识（可选，用于多设备管理）
+	/// 客户端标识（可选，默认使用 Pms_App）
 	/// </summary>
-	[StringLength(128)]
-	public string? DeviceId { get; set; }
+	public string? ClientId { get; set; }
 
 	/// <summary>
-	/// Token类型
+	/// 请求的权限范围（可选）
 	/// </summary>
-	[Required(ErrorMessage = "TokenType不能为空")]
-	[Range(0, int.MaxValue, ErrorMessage = "TokenType值无效")]
-	public TokenType TokenType { get; set; } = TokenType.Web;
-
-	/// <summary>
-	/// 记住我（延长RefreshToken有效期）
-	/// </summary>
-	public bool RememberMe { get; set; } = false;
+	public string? Scope { get; set; }
 }

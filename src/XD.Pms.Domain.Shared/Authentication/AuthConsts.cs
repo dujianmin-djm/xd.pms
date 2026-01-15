@@ -15,16 +15,16 @@ public static class AuthConsts
 		/// <summary>
 		/// Vue 前端应用（Soybean Admin）
 		/// </summary>
-		public const string VueApp = "Pms_App";
+		public const string WebApp = ApiScope + "_Web";
 
 		/// <summary>
 		/// 移动端应用
 		/// </summary>
-		public const string MobileApp = "Pms_Mobile";
+		public const string MobileApp = ApiScope + "_Mobile";
 
 		/// <summary>
 		/// Swagger 测试
 		/// </summary>
-		public const string Swagger = "Pms_Swagger";
+		public const string Swagger = ApiScope + "_Swagger";
 	}
 }

@@ -1,21 +1,27 @@
+using Autofac.Core;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
@@ -43,7 +49,9 @@ using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
 using XD.Pms.Authentication;
 using XD.Pms.EntityFrameworkCore;
+using XD.Pms.Filters;
 using XD.Pms.Localization;
+using XD.Pms.Middlewares;
 using XD.Pms.Permissions;
 using XD.Pms.Web.HealthChecks;
 using XD.Pms.Web.Menus;
@@ -81,7 +89,7 @@ public class PmsWebModule : AbpModule
             );
         });
 
-        PreConfigure<OpenIddictBuilder>(builder =>
+		PreConfigure<OpenIddictBuilder>(builder =>
         {
             builder.AddValidation(options =>
             {
@@ -91,32 +99,26 @@ public class PmsWebModule : AbpModule
             });
         });
 
-        if (!hostingEnvironment.IsDevelopment())
+		// 配置 OpenIddict 服务器
+		var tokenSettings = configuration.GetSection(TokenSettings.SectionName).Get<TokenSettings>();
+        int accessTokenExpirationMinutes = tokenSettings?.AccessTokenExpirationMinutes ?? 30;
+        int refreshTokenExpirationDays = tokenSettings?.RefreshTokenExpirationDays ?? 7;
+		PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
+		{
+			serverBuilder.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenExpirationMinutes));
+			serverBuilder.SetRefreshTokenLifetime(TimeSpan.FromDays(refreshTokenExpirationDays));
+			serverBuilder.SetIdentityTokenLifetime(TimeSpan.FromMinutes(accessTokenExpirationMinutes));
+		});
+
+		if (!hostingEnvironment.IsDevelopment())
         {
             PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
             {
                 options.AddDevelopmentEncryptionAndSigningCertificate = false;
             });
 
-			// 配置 OpenIddict 服务端
 			PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
 			{
-                // 启用 Password Grant（用于前端直接登录）
-				serverBuilder.AllowPasswordFlow();
-
-				// 启用 Refresh Token
-				serverBuilder.AllowRefreshTokenFlow();
-
-				// 启用 Client Credentials 客户端凭证（服务间调用，微服务间调用、定时任务）
-				serverBuilder.AllowClientCredentialsFlow();
-
-				// 设置 Token 有效期
-				serverBuilder.SetAccessTokenLifetime(TimeSpan.FromMinutes(30));
-				serverBuilder.SetRefreshTokenLifetime(TimeSpan.FromDays(7));
-
-				// 开发环境禁用 HTTPS 要求（生产环境必须启用）
-				serverBuilder.UseAspNetCore().DisableTransportSecurityRequirement();
-
 				serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", configuration["AuthServer:CertificatePassPhrase"]!);
                 serverBuilder.SetIssuer(new Uri(configuration["AuthServer:Authority"]!));
             });
@@ -128,13 +130,15 @@ public class PmsWebModule : AbpModule
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
 
-        if (!configuration.GetValue<bool>("App:DisablePII"))
+		// 显示详细身份认证错误信息（开发环境）
+		if (hostingEnvironment.IsDevelopment() && !configuration.GetValue<bool>("App:DisablePII"))
         {
-            IdentityModelEventSource.ShowPII = true;
+			IdentityModelEventSource.ShowPII = true;
             IdentityModelEventSource.LogCompleteSecurityArtifact = true;
         }
 
-        if (!configuration.GetValue<bool>("AuthServer:RequireHttpsMetadata"))
+		// 禁用 HTTPS 要求（开发环境）
+		if (!configuration.GetValue<bool>("AuthServer:RequireHttpsMetadata"))
         {
             Configure<OpenIddictServerAspNetCoreOptions>(options =>
             {
@@ -147,35 +151,67 @@ public class PmsWebModule : AbpModule
             });
         }
 
-        ConfigureBundles();
+		ConfigureBundles();
         ConfigureUrls(configuration);
         ConfigureHealthChecks(context);
         ConfigureAuthentication(context);
         ConfigureVirtualFileSystem(hostingEnvironment);
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
-        ConfigureSwaggerServices(context.Services);
+        ConfigureSwaggerServices(context.Services); //添加 Swagger 支持 OAuth2
 
-        Configure<PermissionManagementOptions>(options =>
+		Configure<PermissionManagementOptions>(options =>
         {
             options.IsDynamicPermissionStoreEnabled = true;
         });
         
         Configure<RazorPagesOptions>(options =>
         {
-			//options.Conventions.AuthorizePage("/Index", PmsPermissions.Books.Default);
 			options.Conventions.AuthorizePage("/Books/Index", PmsPermissions.Books.Default);
             options.Conventions.AuthorizePage("/Books/CreateModal", PmsPermissions.Books.Create);
             options.Conventions.AuthorizePage("/Books/EditModal", PmsPermissions.Books.Edit);
         });
 
+		// 注册 TokenSettings
+		context.Services.Configure<TokenSettings>(configuration.GetSection(TokenSettings.SectionName));
 
-		// 配置 JWT Settings
-		ConfigureJwtSettings(context, configuration);
+		// 注册 HttpClient
+		context.Services.AddHttpClient();
 
-		// 配置 JWT 认证
-		//ConfigureJwtAuthentication(context, configuration);
+		// 配置 CORS
+		ConfigureCors(context, configuration);
 
+		// 添加响应包装过滤器
+		//Configure<MvcOptions>(options =>
+		//{
+		//	options.Filters.Add<ApiResponseWrapperFilter>();
+		//});
+
+		// 配置 Cookie 认证，对 API 请求返回 401 而非重定向
+		Configure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, options =>
+		{
+			options.Events.OnRedirectToLogin = context =>
+			{
+				if (IsApiRequest(context.Request))
+				{
+					context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+					return Task.CompletedTask;
+				}
+				context.Response.Redirect(context.RedirectUri);
+				return Task.CompletedTask;
+			};
+
+			options.Events.OnRedirectToAccessDenied = context =>
+			{
+				if (IsApiRequest(context.Request))
+				{
+					context.Response.StatusCode = StatusCodes.Status403Forbidden;
+					return Task.CompletedTask;
+				}
+				context.Response.Redirect(context.RedirectUri);
+				return Task.CompletedTask;
+			};
+		});
 
 		//Configure<AbpAntiForgeryOptions>(options =>
 		//{
@@ -184,70 +220,33 @@ public class PmsWebModule : AbpModule
 		//});
 	}
 
-	private static void ConfigureJwtSettings(ServiceConfigurationContext context, IConfiguration configuration)
+	private static bool IsApiRequest(HttpRequest request)
 	{
-		context.Services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+		var path = request.Path.Value?.ToLower() ?? "";
+		return path.StartsWith("/api/") ||
+			   request.Headers.XRequestedWith.ToString() == "XMLHttpRequest" ||
+			   request.Headers.Accept.ToString().Contains("application/json");
 	}
 
-	private static void ConfigureJwtAuthentication(ServiceConfigurationContext context, IConfiguration configuration)
+	private static void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
 	{
-		var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()!;
+		var corsSettings = configuration.GetSection("Cors");
+		var allowedOrigins = corsSettings.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+		var allowedMethods = corsSettings.GetSection("AllowedMethods").Get<string[]>() ?? ["GET"];
 
-		context.Services.AddAuthentication(options =>
+		context.Services.AddCors(options =>
 		{
-			// 把默认认证方案改成了 JwtBearer（DefaultAuthenticate / Challenge / Scheme 都指向 JWT）。
-			// 这会把整个应用（包括 Razor Pages UI）默认的认证方式改为 Bearer Token。
-
-			//options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-			//options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-			//options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-
-			// 取消把应用的默认认证方案强制设为 JWT。保留框架 / Identity / OpenIddict 为默认（用于交互式登录和 Cookie）
-            // 只注册 JwtBearer 用于 API / SignalR 场景。
-		})
-		.AddJwtBearer(options =>
-		{
-			options.SaveToken = true;
-			options.RequireHttpsMetadata = false; // 生产环境建议设为 true
-			options.TokenValidationParameters = new TokenValidationParameters
+			options.AddDefaultPolicy(builder =>
 			{
-				ValidateIssuer = true,
-				ValidateAudience = true,
-				ValidateLifetime = true,
-				ValidateIssuerSigningKey = true,
-				ClockSkew = TimeSpan.Zero, // 不允许时钟偏移
-				ValidIssuer = jwtSettings.Issuer,
-				ValidAudience = jwtSettings.Audience,
-				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
-			};
-
-			// 从 Query String 读取 Token（用于 SignalR 等场景）
-			options.Events = new JwtBearerEvents
-			{
-				OnMessageReceived = context =>
-				{
-					var accessToken = context.Request.Query["access_token"];
-					var path = context.HttpContext.Request.Path;
-
-					// SignalR Hub 路径
-					if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/signalr-hubs"))
-					{
-						context.Token = accessToken;
-					}
-					return Task.CompletedTask;
-				},
-				OnAuthenticationFailed = context =>
-				{
-					if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-					{
-						context.Response.Headers.Append("Token-Expired", "true");
-					}
-					return Task.CompletedTask;
-				}
-			};
+				builder.WithOrigins(allowedOrigins)
+					.WithAbpExposedHeaders()
+					.SetIsOriginAllowedToAllowWildcardSubdomains()
+					.AllowAnyHeader()
+					.WithMethods(allowedMethods)
+					.AllowCredentials();
+			});
 		});
 	}
-
 
 	private static void ConfigureHealthChecks(ServiceConfigurationContext context)
     {
@@ -324,9 +323,6 @@ public class PmsWebModule : AbpModule
         });
     }
 
-	/// <summary>
-	///  ABP 的约定式 API 控制器自动注册，它会自动将 Application 层中的服务注册为 API 控制器
-	/// </summary>
 	private void ConfigureAutoApiControllers()
     {
         Configure<AbpAspNetCoreMvcOptions>(options =>
@@ -339,34 +335,47 @@ public class PmsWebModule : AbpModule
     {
 		services.AddAbpSwaggerGen(options =>
 		{
-			options.SwaggerDoc("v1", new OpenApiInfo { Title = "Pms API", Version = "v1" });
+			options.SwaggerDoc("v1", new OpenApiInfo { Title = "Pms API", Version = "v1", Description = "" });
 			options.DocInclusionPredicate((docName, description) => true);
 			options.CustomSchemaIds(type => type.FullName);
 
-			// 添加 JWT 认证配置
-			options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+			// 添加 OAuth2 密码模式支持
+			options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
 			{
-				Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-				Name = "Authorization",
-				In = ParameterLocation.Header,
-				Type = SecuritySchemeType.ApiKey,
-				Scheme = "Bearer"
+				Type = SecuritySchemeType.OAuth2,
+				Flows = new OpenApiOAuthFlows
+				{
+					Password = new OpenApiOAuthFlow
+					{
+						TokenUrl = new Uri("/connect/token", UriKind.Relative),
+						Scopes = new Dictionary<string, string>
+						{
+							["openid"] = "OpenID",
+							["profile"] = "Profile",
+							["email"] = "Email",
+							["roles"] = "Roles",
+							["Pms"] = "Pms API"
+						}
+					}
+				},
+				Description = "OAuth2 密码模式认证"
 			});
 
 			options.AddSecurityRequirement(new OpenApiSecurityRequirement
-		    {
-			    {
-				    new OpenApiSecurityScheme
-				    {
-					    Reference = new OpenApiReference
-					    {
-						    Type = ReferenceType.SecurityScheme,
-						    Id = "Bearer"
-					    }
-				    },
-				    Array.Empty<string>()
-			    }
-		    });
+			{
+				{
+					new OpenApiSecurityScheme
+					{
+						Reference = new OpenApiReference
+						{
+							Type = ReferenceType.SecurityScheme,
+							Id = "oauth2"
+						}
+					},
+					new[] { "Pms" }
+				}
+			});
+
 		});
 	}
 
@@ -375,7 +384,7 @@ public class PmsWebModule : AbpModule
     {
 		await base.OnApplicationInitializationAsync(context);
 		// 注册刷新令牌清理后台任务
-		await context.AddBackgroundWorkerAsync<RefreshTokenCleanupWorker>();
+		// await context.AddBackgroundWorkerAsync<RefreshTokenCleanupWorker>();
 
 		var app = context.GetApplicationBuilder();
         var env = context.GetEnvironment();
@@ -387,7 +396,10 @@ public class PmsWebModule : AbpModule
             app.UseDeveloperExceptionPage();
         }
 
-        app.UseAbpRequestLocalization();
+		// 异常处理中间件
+		app.UseApiExceptionHandler();
+
+		app.UseAbpRequestLocalization();
 
         if (!env.IsDevelopment())
         {
@@ -397,7 +409,10 @@ public class PmsWebModule : AbpModule
 
         app.UseCorrelationId();
         app.UseRouting();
-        app.MapAbpStaticAssets();
+
+		app.UseCors();
+
+		app.MapAbpStaticAssets();
         app.UseAbpSecurityHeaders();
         app.UseAuthentication();
         app.UseAbpOpenIddictValidation();
@@ -409,7 +424,7 @@ public class PmsWebModule : AbpModule
         app.UseAbpSwaggerUI(options =>
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "Pms API");
-        });
+		});
         //app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();

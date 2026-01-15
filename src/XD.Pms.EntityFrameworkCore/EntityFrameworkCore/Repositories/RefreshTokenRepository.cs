@@ -57,7 +57,7 @@ public class RefreshTokenRepository : EfCoreRepository<PmsDbContext, RefreshToke
 	public async Task<int> CleanupExpiredTokensAsync(CancellationToken cancellationToken = default)
 	{
 		var dbContext = await GetDbContextAsync();
-		var cutoffDate = _clock.Now.AddDays(-AuthenticationConsts.RefreshTokenRetentionDays);
+		var cutoffDate = _clock.Now.AddDays(-30);
 
 		return await dbContext.Database.ExecuteSqlInterpolatedAsync(
 			$@"DELETE FROM AppRefreshTokens WHERE ExpiresAt < {cutoffDate}",
