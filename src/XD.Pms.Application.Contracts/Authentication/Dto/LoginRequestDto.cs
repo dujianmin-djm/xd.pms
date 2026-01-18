@@ -22,12 +22,12 @@ public class LoginRequestDto
 	public string Password { get; set; } = default!;
 
 	/// <summary>
-	/// 客户端标识（可选，默认使用 Pms_App）
+	/// 客户端标识（"Pms_App", "Pms_Mobile"）
 	/// </summary>
 	public string? ClientId { get; set; }
 
 	/// <summary>
-	/// 请求的权限范围（可选）
+	/// 请求的权限范围
 	/// </summary>
 	public string? Scope { get; set; }
 }

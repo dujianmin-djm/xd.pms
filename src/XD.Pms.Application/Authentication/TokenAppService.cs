@@ -4,13 +4,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Authentication;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Volo.Abp;
 using Volo.Abp.Identity;
 using XD.Pms.ApiResponse;
 using XD.Pms.Authentication.Dto;
@@ -20,7 +20,6 @@ namespace XD.Pms.Authentication;
 /// <summary>
 /// Token 认证服务（封装 OpenIddict）
 /// </summary>
-[RemoteService(IsEnabled = false)]
 public class TokenAppService : PmsAppService, ITokenAppService
 {
 	private readonly IHttpClientFactory _httpClientFactory;
@@ -28,23 +27,30 @@ public class TokenAppService : PmsAppService, ITokenAppService
 	private readonly IdentityUserManager _userManager;
 	private readonly IConfiguration _configuration;
 	private readonly TokenSettings _tokenSettings;
+	private readonly ITokenBlacklistService _tokenBlacklistService;
 
 	public TokenAppService(
 		IHttpClientFactory httpClientFactory,
 		IHttpContextAccessor httpContextAccessor,
 		IdentityUserManager userManager,
 		IConfiguration configuration,
-		IOptions<TokenSettings> tokenSettings)
+		IOptions<TokenSettings> tokenSettings,
+		ITokenBlacklistService tokenBlacklistService)
 	{
 		_httpClientFactory = httpClientFactory;
 		_httpContextAccessor = httpContextAccessor;
 		_userManager = userManager;
 		_configuration = configuration;
 		_tokenSettings = tokenSettings.Value;
+		_tokenBlacklistService = tokenBlacklistService;
 	}
 
+	/// <summary>
+	/// 用户登录
+	/// </summary>
 	public async Task<LoginResponseDto> LoginAsync(LoginRequestDto input)
 	{
+		// 构建请求参数
 		var clientId = input.ClientId ?? GetDefaultClientId();
 		var scope = input.Scope ?? "openid profile email phone roles Pms offline_access";
 
@@ -65,16 +71,16 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		// 获取用户信息
 		var user = await _userManager.FindByNameAsync(input.UserNameOrEmail)
 				   ?? await _userManager.FindByEmailAsync(input.UserNameOrEmail)
-				   ?? throw new UserFriendlyException("当前账号不存在");
-
+				   ?? throw new AuthenticationException(ApiResponseCode.InvalidCredentials, L["Auth:AccountNotFound"].Value);
+		
 		if (!user.IsActive)
 		{
-			throw new UserFriendlyException("账户尚未启用");
+			throw new AuthenticationException(ApiResponseCode.InvalidCredentials, L["Auth:AccountDisabled"].Value);
 		}
 
 		if (await _userManager.IsLockedOutAsync(user))
 		{
-			throw new UserFriendlyException("账户已被锁定，请稍后再试");
+			throw new AuthenticationException(ApiResponseCode.InvalidCredentials, L["Auth:AccountLocked"].Value);
 		}
 
 		var roles = await _userManager.GetRolesAsync(user);
@@ -88,6 +94,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			AccessTokenExpiration = Clock.Now.AddSeconds(tokenResponse.ExpiresIn),
 			RefreshTokenExpiration = Clock.Now.AddDays(_tokenSettings.RefreshTokenExpirationDays),
 			Scope = tokenResponse.Scope,
+			Language = CultureInfo.CurrentCulture.Name,
 			User = new UserInfoDto
 			{
 				Id = user.Id,
@@ -105,6 +112,9 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		};
 	}
 
+	/// <summary>
+	/// 刷新令牌
+	/// </summary>
 	public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto input)
 	{
 		var clientId = input.ClientId ?? GetDefaultClientId();
@@ -127,10 +137,14 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			ExpiresIn = tokenResponse.ExpiresIn,
 			AccessTokenExpiration = Clock.Now.AddSeconds(tokenResponse.ExpiresIn),
 			RefreshTokenExpiration = Clock.Now.AddDays(_tokenSettings.RefreshTokenExpirationDays),
-			Scope = tokenResponse.Scope
+			Scope = tokenResponse.Scope,
+			Language = CultureInfo.CurrentCulture.Name
 		};
 	}
 
+	/// <summary>
+	/// 撤销令牌
+	/// </summary>
 	[Authorize]
 	public async Task RevokeTokenAsync(string? token = null)
 	{
@@ -139,6 +153,15 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		if (string.IsNullOrEmpty(accessToken))
 		{
 			return;
+		}
+
+		// 解析 Token 获取 JTI 和过期时间
+		var (jti, expiration) = ParseTokenInfo(accessToken);
+
+		if (!string.IsNullOrEmpty(jti) && expiration.HasValue)
+		{
+			// 加入黑名单
+			await _tokenBlacklistService.AddToBlacklistAsync(jti, expiration.Value);
 		}
 
 		var revocationEndpoint = GetRevocationEndpoint();
@@ -162,16 +185,19 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		}
 	}
 
+	/// <summary>
+	/// 获取当前用户信息
+	/// </summary>
 	[Authorize]
 	public async Task<UserInfoDto> GetCurrentUserInfoAsync()
 	{
 		if (CurrentUser.Id == null)
 		{
-			throw new UserFriendlyException("用户未登录");
+			throw new AuthenticationException(ApiResponseCode.Unauthorized, L["Auth:Unauthorized"].Value);
 		}
 
-		var user = await _userManager.FindByIdAsync(CurrentUser.Id.Value.ToString()) 
-				?? throw new UserFriendlyException("用户不存在");
+		var user = await _userManager.FindByIdAsync(CurrentUser.Id.Value.ToString())
+			?? throw new AuthenticationException(ApiResponseCode.AccountNotFound, L["Auth:AccountNotFound"].Value);
 
 		var roles = await _userManager.GetRolesAsync(user);
 
@@ -213,7 +239,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 
 		if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
 		{
-			throw new AuthenticationException(ApiResponseCode.InternalError, "获取令牌失败");
+			throw new AuthenticationException(ApiResponseCode.InternalError, L["Auth:GetTokenFailed"].Value);
 		}
 
 		return tokenResponse;
@@ -221,8 +247,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 
 	private string GetTokenEndpoint()
 	{
-		var request = _httpContextAccessor.HttpContext?.Request 
-				?? throw new UserFriendlyException("无法获取请求上下文");
+		var request = _httpContextAccessor.HttpContext.Request;
 
 		var authority = _configuration["AuthServer:Authority"]?.TrimEnd('/')
 						?? $"{request.Scheme}://{request.Host}";
@@ -232,8 +257,8 @@ public class TokenAppService : PmsAppService, ITokenAppService
 
 	private string GetRevocationEndpoint()
 	{
-		var request = _httpContextAccessor.HttpContext?.Request
-					?? throw new UserFriendlyException("无法获取请求上下文");
+		var request = _httpContextAccessor.HttpContext.Request;
+
 		var authority = _configuration["AuthServer:Authority"]?.TrimEnd('/')
 						?? $"{request.Scheme}://{request.Host}";
 
@@ -258,91 +283,92 @@ public class TokenAppService : PmsAppService, ITokenAppService
 	}
 
 	/// <summary>
-	/// 获取友好的错误信息
+	/// 获取友好的错误信息（多语言）
 	/// </summary>
-	private static (string Code, string Message) GetFriendlyError(string? error, string? description, string operation)
+	private (string Code, string Message) GetFriendlyError(string? error, string? description, string operation)
 	{
-		// 根据操作类型和错误类型返回不同的提示
 		return (error, operation) switch
 		{
 			// ==================== 登录场景 ====================
-
-			// 账户被锁定
 			("invalid_grant", "login") when ContainsAny(description, "locked", "lockout")
-				=> (ApiResponseCode.AccountLocked, "账户已被锁定，请稍后再试或联系管理员"),
+				=> (ApiResponseCode.AccountLocked, L["Auth:AccountLocked"].Value),
 
-			// 账户被禁用
-			("invalid_grant", "login") when ContainsAny(description, "disabled", "inactive")
-				=> (ApiResponseCode.AccountDisabled, "账户已被禁用，请联系管理员"),
+			("account_inactive", "login")
+				=> (ApiResponseCode.AccountDisabled, L["Auth:AccountDisabled"].Value),
 
-			// 账户不允许登录
 			("invalid_grant", "login") when ContainsAny(description, "not allowed", "denied")
-				=> (ApiResponseCode.Forbidden, "该账户不允许登录"),
+				=> (ApiResponseCode.Forbidden, L["Auth:AccountNotAllowed"].Value),
 
-			// 用户不存在
 			("invalid_grant", "login") when ContainsAny(description, "user not found", "no user")
-				=> (ApiResponseCode.InvalidCredentials, "用户名或密码错误"),
+				=> (ApiResponseCode.InvalidCredentials, L["Auth:InvalidCredentials"].Value),
 
-			// 密码错误 / 默认登录错误
 			("invalid_grant", "login")
-				=> (ApiResponseCode.InvalidCredentials, "用户名或密码错误"),
+				=> (ApiResponseCode.InvalidCredentials, L["Auth:InvalidCredentials"].Value),
 
 			// ==================== 刷新 Token 场景 ====================
-
-			// Token 已过期
 			("invalid_grant", "refresh") when ContainsAny(description, "expired")
-				=> (ApiResponseCode.RefreshTokenExpired, "登录已过期，请重新登录"),
+				=> (ApiResponseCode.RefreshTokenExpired, L["Auth:RefreshTokenExpired"].Value),
 
-			// Token 已被撤销
 			("invalid_grant", "refresh") when ContainsAny(description, "revoked", "invalidated")
-				=> (ApiResponseCode.TokenInvalid, "登录凭证已失效，请重新登录"),
+				=> (ApiResponseCode.TokenInvalid, L["Auth:TokenRevoked"].Value),
 
-			// Token 无效 / 默认刷新错误
 			("invalid_grant", "refresh")
-				=> (ApiResponseCode.RefreshTokenExpired, "刷新令牌无效，请重新登录"),
+				=> (ApiResponseCode.RefreshTokenExpired, L["Auth:RefreshTokenInvalid"].Value),
 
 			// ==================== 通用错误 ====================
-
-			// 客户端配置错误
 			("invalid_client", _)
-				=> (ApiResponseCode.InternalError, "客户端配置错误，请联系管理员"),
+				=> (ApiResponseCode.InternalError, L["Auth:ClientConfigError"].Value),
 
-			// 权限范围无效
 			("invalid_scope", _)
-				=> (ApiResponseCode.BadRequest, "请求的权限范围无效"),
+				=> (ApiResponseCode.BadRequest, L["Auth:InvalidScope"].Value),
 
-			// 客户端未授权
 			("unauthorized_client", _)
-				=> (ApiResponseCode.Forbidden, "客户端未授权使用此认证方式"),
+				=> (ApiResponseCode.Forbidden, L["Auth:ClientUnauthorized"].Value),
 
-			// 请求参数错误
 			("invalid_request", _)
-				=> (ApiResponseCode.ValidationError, description ?? "请求参数错误"),
+				=> (ApiResponseCode.ValidationError, description ?? L["Auth:InvalidRequest"].Value),
 
-			// 访问被拒绝
 			("access_denied", _)
-				=> (ApiResponseCode.Forbidden, "访问被拒绝"),
+				=> (ApiResponseCode.Forbidden, L["Auth:AccessDenied"].Value),
 
-			// 需要二次验证
 			("mfa_required", _)
-				=> (ApiResponseCode.TwoFactorRequired, "需要进行二次验证"),
+				=> (ApiResponseCode.TwoFactorRequired, L["Auth:TwoFactorRequired"].Value),
 
-			// 二次验证失败
 			("invalid_mfa", _)
-				=> (ApiResponseCode.TwoFactorInvalid, "验证码错误，请重试"),
+				=> (ApiResponseCode.TwoFactorInvalid, L["Auth:TwoFactorInvalid"].Value),
 
 			// 默认错误
-			_ => (ApiResponseCode.InternalError, description ?? "认证失败，请稍后重试")
+			_ => (ApiResponseCode.InternalError, description ?? L["Auth:AuthenticationFailed"].Value)
 		};
 	}
 
-	/// <summary>
-	/// 检查字符串是否包含任意关键词（忽略大小写）
-	/// </summary>
 	private static bool ContainsAny(string? text, params string[] keywords)
 	{
 		if (string.IsNullOrEmpty(text)) return false;
 		return keywords.Any(k => text.Contains(k, StringComparison.OrdinalIgnoreCase));
+	}
+
+	private static (string? Jti, DateTime? Expiration) ParseTokenInfo(string token)
+	{
+		try
+		{
+			var handler = new JwtSecurityTokenHandler();
+
+			if (!handler.CanReadToken(token))
+			{
+				return (null, null);
+			}
+
+			var jwtToken = handler.ReadJwtToken(token);
+			var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
+			var exp = jwtToken.ValidTo;
+
+			return (jti, exp);
+		}
+		catch
+		{
+			return (null, null);
+		}
 	}
 
 	#endregion

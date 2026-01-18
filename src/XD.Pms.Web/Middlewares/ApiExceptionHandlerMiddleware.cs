@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -10,8 +12,9 @@ using Volo.Abp.Domain.Entities;
 using Volo.Abp.Validation;
 using XD.Pms.ApiResponse;
 using XD.Pms.Authentication;
+using XD.Pms.Localization;
 
-namespace XD.Pms.Middlewares;
+namespace XD.Pms.Web.Middlewares;
 
 /// <summary>
 /// API 异常处理中间件
@@ -33,23 +36,26 @@ public class ApiExceptionHandlerMiddleware
 		_logger = logger;
 	}
 
-	public async Task InvokeAsync(HttpContext context)
+	public async Task InvokeAsync(HttpContext context, IStringLocalizer<PmsResource> localizer)
 	{
 		try
 		{
+			// 从请求头获取语言设置
+			SetCultureFromRequest(context);
+
 			await _next(context);
 
 			// 处理 401/403 等状态码（未被异常捕获的情况）
 			if (!context.Response.HasStarted && IsApiRequest(context))
 			{
-				await HandleStatusCodeAsync(context);
+				await HandleStatusCodeAsync(context, localizer);
 			}
 		}
 		catch (Exception ex)
 		{
 			if (IsApiRequest(context) && !context.Response.HasStarted)
 			{
-				await HandleExceptionAsync(context, ex);
+				await HandleExceptionAsync(context, ex, localizer);
 			}
 			else
 			{
@@ -58,28 +64,70 @@ public class ApiExceptionHandlerMiddleware
 		}
 	}
 
-	private static async Task HandleStatusCodeAsync(HttpContext context)
+	/// <summary>
+	/// 从请求中设置语言环境
+	/// </summary>
+	private static void SetCultureFromRequest(HttpContext context)
+	{
+		// 优先级：X-Language 头 > Accept-Language 头
+
+		// 1. 自定义头 X-Language
+		var xLanguage = context.Request.Headers["X-Language"].FirstOrDefault();
+		if (!string.IsNullOrEmpty(xLanguage))
+		{
+			TrySetCulture(xLanguage);
+			return;
+		}
+
+		// 2. 标准头 Accept-Language
+		var acceptLanguage = context.Request.Headers.AcceptLanguage.FirstOrDefault();
+		if (!string.IsNullOrEmpty(acceptLanguage))
+		{
+			// Accept-Language 可能包含多个语言和权重，取第一个
+			var language = acceptLanguage.Split(',').FirstOrDefault()?.Split(';').FirstOrDefault()?.Trim();
+			if (!string.IsNullOrEmpty(language))
+			{
+				TrySetCulture(language);
+			}
+		}
+	}
+
+	private static void TrySetCulture(string language)
+	{
+		try
+		{
+			var culture = CultureInfo.GetCultureInfo(language);
+			CultureInfo.CurrentCulture = culture;
+			CultureInfo.CurrentUICulture = culture;
+		}
+		catch (CultureNotFoundException)
+		{
+			// 忽略无效语言
+		}
+	}
+
+	private static async Task HandleStatusCodeAsync(HttpContext context, IStringLocalizer<PmsResource> localizer)
 	{
 		var statusCode = context.Response.StatusCode;
 
 		// 只处理错误状态码
 		if (statusCode >= 400 && context.Response.ContentLength == null)
 		{
-			var (code, message) = statusCode switch
+			var (code, messageKey) = statusCode switch
 			{
-				401 => (ApiResponseCode.Unauthorized, "未经授权的访问，请先登录"),
-				403 => (ApiResponseCode.Forbidden, "没有权限访问此资源"),
-				404 => (ApiResponseCode.NotFound, "请求的资源不存在"),
-				405 => (ApiResponseCode.BadRequest, "不支持的请求方法"),
-				429 => (ApiResponseCode.TooManyRequests, "请求过于频繁，请稍后再试"),
-				_ => (ApiResponseCode.InternalError, "请求失败")
+				401 => (ApiResponseCode.Unauthorized, "Auth:Unauthorized"),
+				403 => (ApiResponseCode.Forbidden, "Auth:Forbidden"),
+				404 => (ApiResponseCode.NotFound, "Auth:NotFound"),
+				405 => (ApiResponseCode.BadRequest, "Auth:BadRequest"),
+				429 => (ApiResponseCode.TooManyRequests, "Auth:TooManyRequests"),
+				_ => (ApiResponseCode.InternalError, "Auth:OperationFailed")
 			};
 
-			await WriteResponseAsync(context, code, message);
+			await WriteResponseAsync(context, code, localizer[messageKey].Value);
 		}
 	}
 
-	private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+	private async Task HandleExceptionAsync(HttpContext context, Exception exception, IStringLocalizer<PmsResource> localizer)
 	{
 		_logger.LogError(exception, "API 请求异常: {Path}", context.Request.Path);
 
@@ -95,15 +143,15 @@ public class ApiExceptionHandlerMiddleware
 
 			// ABP 授权异常
 			AbpAuthorizationException
-				=> (ApiResponseCode.Forbidden, "没有权限执行此操作"),
+				=> (ApiResponseCode.Forbidden, localizer["Auth:Forbidden"].Value),
 
 			// ABP 验证异常
 			AbpValidationException validationEx
 				=> (ApiResponseCode.ValidationError, FormatValidationErrors(validationEx)),
 
 			// 实体不存在
-			EntityNotFoundException entityEx
-				=> (ApiResponseCode.NotFound, $"请求的{GetEntityDisplayName(entityEx)}不存在"),
+			EntityNotFoundException
+				=> (ApiResponseCode.NotFound, localizer["Auth:NotFound"].Value),
 
 			// ABP 业务异常（通用）
 			BusinessException bizEx
@@ -111,14 +159,14 @@ public class ApiExceptionHandlerMiddleware
 
 			// 操作取消
 			OperationCanceledException
-				=> (ApiResponseCode.BadRequest, "操作已取消"),
+				=> (ApiResponseCode.BadRequest, "Operation Canceled"),
 
 			// 参数异常
 			ArgumentException argEx
 				=> (ApiResponseCode.ValidationError, argEx.Message),
 
 			// 未处理的异常
-			_ => (ApiResponseCode.InternalError, exception.Message ?? "服务器内部错误，请稍后重试")
+			_ => (ApiResponseCode.InternalError, localizer["Auth:ServerError"].Value)
 		};
 
 		await WriteResponseAsync(context, code, message);
@@ -130,12 +178,7 @@ public class ApiExceptionHandlerMiddleware
 		context.Response.StatusCode = 200;
 		context.Response.ContentType = "application/json; charset=utf-8";
 
-		var response = new ApiResponse<object>
-		{
-			Code = code,
-			Data = null,
-			Message = message
-		};
+		var response = ApiResponse<object>.Fail(code, message);
 
 		await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
 	}
@@ -163,20 +206,7 @@ public class ApiExceptionHandlerMiddleware
 			.SelectMany(e => e.MemberNames.Select(m => $"{m}: {e.ErrorMessage}"))
 			.ToList();
 
-		return errors.Count > 0 ? string.Join("; ", errors) : "参数验证失败";
-	}
-
-	private static string GetEntityDisplayName(EntityNotFoundException ex)
-	{
-		// 可以根据实体类型返回友好名称
-		var entityType = ex.EntityType?.Name ?? "资源";
-		return entityType switch
-		{
-			"IdentityUser" => "用户",
-			"IdentityRole" => "角色",
-			"Book" => "图书",
-			_ => "数据"
-		};
+		return string.Join("; ", errors);
 	}
 
 	private static string GetBusinessExceptionCode(BusinessException ex)

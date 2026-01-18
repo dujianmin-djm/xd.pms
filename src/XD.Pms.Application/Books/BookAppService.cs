@@ -1,12 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using XD.Pms.Permissions;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Repositories;
-using System.Linq.Dynamic.Core;
+using XD.Pms.ApiResponse;
+using XD.Pms.Authentication;
+using XD.Pms.Permissions;
 
 namespace XD.Pms.Books;
 
@@ -28,7 +30,10 @@ public class BookAppService : PmsAppService, IBookAppService
 
     public async Task<PagedResultDto<BookDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
-        var queryable = await _repository.GetQueryableAsync();
+        string message = L["Auth:ClientUnauthorized"].Value;
+
+
+		var queryable = await _repository.GetQueryableAsync();
 			//.WhereIf(!input.Filter.IsNullOrWhiteSpace(), book => book.Name.Contains(input.Filter));
         var query = queryable
 			.OrderBy(input.Sorting.IsNullOrWhiteSpace() ? "Name" : input.Sorting)
@@ -37,7 +42,7 @@ public class BookAppService : PmsAppService, IBookAppService
         var books = await AsyncExecuter.ToListAsync(query);
 		var totalCount = await AsyncExecuter.CountAsync(queryable);
 
-        return new PagedResultDto<BookDto>(
+		return new PagedResultDto<BookDto>(
             totalCount,
             ObjectMapper.Map<List<Book>, List<BookDto>>(books)
         );

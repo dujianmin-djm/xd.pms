@@ -22,14 +22,14 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 		if (context.Result is ObjectResult objectResult)
 		{
 			// 如果已经是 ApiResponse 类型，不再包装
-			if (objectResult.Value is ApiResponse<object>)
+			if (objectResult.Value is IApiResponse)
 			{
 				await next();
 				return;
 			}
 
 			// 包装响应
-			var wrappedResult = ApiResponse<object>.Success(objectResult.Value);
+			var wrappedResult = ApiResponse<object>.Succeed(true, objectResult.Value);
 			context.Result = new ObjectResult(wrappedResult)
 			{
 				StatusCode = objectResult.StatusCode ?? 200
@@ -37,7 +37,7 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 		}
 		else if (context.Result is EmptyResult)
 		{
-			context.Result = new ObjectResult(ApiResponse<object>.Success(null))
+			context.Result = new ObjectResult(ApiResponse<object>.Succeed(true, null))
 			{
 				StatusCode = 200
 			};

@@ -43,6 +43,11 @@ public class LoginResponseDto
 	public string? Scope { get; set; }
 
 	/// <summary>
+	/// 语言标识
+	/// </summary>
+	public string? Language { get; set; }
+
+	/// <summary>
 	/// 用户信息
 	/// </summary>
 	public UserInfoDto User { get; set; } = default!;

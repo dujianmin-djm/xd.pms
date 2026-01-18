@@ -156,7 +156,7 @@ public static class ApiResponseCode
 	/// <summary>
 	/// 用户不存在
 	/// </summary>
-	public const string UserNotFound = "40401";
+	public const string AccountNotFound = "40401";
 
 	/// <summary>
 	/// 数据不存在

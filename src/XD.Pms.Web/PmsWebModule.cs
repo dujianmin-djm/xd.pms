@@ -1,7 +1,4 @@
-using Autofac.Core;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
@@ -9,20 +6,23 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RequestLocalization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Account.Web;
@@ -32,7 +32,6 @@ using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
-using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Toolbars;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
@@ -51,8 +50,8 @@ using XD.Pms.Authentication;
 using XD.Pms.EntityFrameworkCore;
 using XD.Pms.Filters;
 using XD.Pms.Localization;
-using XD.Pms.Middlewares;
 using XD.Pms.Permissions;
+using XD.Pms.Web.Authentication;
 using XD.Pms.Web.HealthChecks;
 using XD.Pms.Web.Menus;
 
@@ -96,7 +95,10 @@ public class PmsWebModule : AbpModule
                 options.AddAudiences("Pms");
                 options.UseLocalServer();
                 options.UseAspNetCore();
-            });
+
+				// 添加黑名单验证处理器
+				options.AddEventHandler(TokenBlacklistValidationHandler.Descriptor);
+			});
         });
 
 		// 配置 OpenIddict 服务器
@@ -108,6 +110,14 @@ public class PmsWebModule : AbpModule
 			serverBuilder.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenExpirationMinutes));
 			serverBuilder.SetRefreshTokenLifetime(TimeSpan.FromDays(refreshTokenExpirationDays));
 			serverBuilder.SetIdentityTokenLifetime(TimeSpan.FromMinutes(accessTokenExpirationMinutes));
+
+			// ======== 启用 Reference Tokens ========
+			// Access Token 使用 Reference Token（存储在数据库，支持即时撤销）
+			//serverBuilder.UseReferenceAccessTokens();
+
+			// Refresh Token 使用 Reference Token
+			//serverBuilder.UseReferenceRefreshTokens();
+			// ======== 未用，使用 Token 黑名单代替 ========
 		});
 
 		if (!hostingEnvironment.IsDevelopment())
@@ -158,7 +168,7 @@ public class PmsWebModule : AbpModule
         ConfigureVirtualFileSystem(hostingEnvironment);
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
-        ConfigureSwaggerServices(context.Services); //添加 Swagger 支持 OAuth2
+        ConfigureSwaggerServices(context.Services);
 
 		Configure<PermissionManagementOptions>(options =>
         {
@@ -181,12 +191,84 @@ public class PmsWebModule : AbpModule
 		// 配置 CORS
 		ConfigureCors(context, configuration);
 
-		// 添加响应包装过滤器
-		//Configure<MvcOptions>(options =>
-		//{
-		//	options.Filters.Add<ApiResponseWrapperFilter>();
-		//});
+        // 添加响应包装过滤器
+        Configure<MvcOptions>(options =>
+        {
+            options.Filters.Add<ApiResponseWrapperFilter>();
+        });
 
+        ConfigureCookieAuthentication();
+		ConfigureRequestLocalization();
+
+		//Configure<AbpAntiForgeryOptions>(options =>
+		//{
+		//    options.TokenCookie.SameSite = SameSiteMode.Lax;
+		//    options.TokenCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+		//});
+	}
+
+	private void ConfigureRequestLocalization()
+    {
+		Configure<AbpRequestLocalizationOptions>(options =>
+		{
+			options.RequestLocalizationOptionConfigurators.Add(async (serviceProvider, requestLocalizationOptions) =>
+            {
+				requestLocalizationOptions.DefaultRequestCulture = new RequestCulture("zh-Hans");
+
+    //            var supportedCultures = new[]
+    //            {
+    //                new CultureInfo("zh-Hans"),
+    //                new CultureInfo("zh-Hant"),
+    //                new CultureInfo("en")
+    //            };
+    //            requestLocalizationOptions.SupportedCultures = supportedCultures;
+    //            requestLocalizationOptions.SupportedUICultures = supportedCultures;
+
+                // 回退策略：当请求的语言不被支持时使用默认语言
+                requestLocalizationOptions.FallBackToParentCultures = true;
+                requestLocalizationOptions.FallBackToParentUICultures = true;
+
+				var providers = requestLocalizationOptions.RequestCultureProviders;
+
+				// 保存现有的 CookieRequestCultureProvider（ABP Web UI 需要）
+				var cookieProvider = providers.OfType<CookieRequestCultureProvider>().FirstOrDefault();
+
+				// 保存现有的 QueryStringRequestCultureProvider
+				var queryStringProvider = providers.OfType<QueryStringRequestCultureProvider>().FirstOrDefault();
+
+				// 清除所有 Provider
+				providers.Clear();
+
+                // 按优先级添加 Provider
+                // 1. QueryString（支持 ?lang=xxx 和 ABP 默认的 ?culture=xxx）
+                providers.Add(new QueryStringRequestCultureProvider
+                {
+                    QueryStringKey = "culture",
+                    UIQueryStringKey = "ui-culture"
+                });
+
+                // 额外添加支持 ?lang=xxx
+                providers.Add(new QueryStringRequestCultureProvider
+				{
+					QueryStringKey = "lang",
+					UIQueryStringKey = "lang"
+				});
+
+				// 3. Cookie （保留 ABP Web UI 功能）
+				providers.Add(cookieProvider ?? new CookieRequestCultureProvider());
+
+				// 4. Accept-Language 请求头
+				providers.Add(new AcceptLanguageHeaderRequestCultureProvider());
+
+				// 如果所有 Provider 都没有匹配，将使用 DefaultRequestCulture
+
+				//await Task.CompletedTask;
+			});
+		});
+	}
+
+	private void ConfigureCookieAuthentication()
+    {
 		// 配置 Cookie 认证，对 API 请求返回 401 而非重定向
 		Configure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, options =>
 		{
@@ -212,12 +294,6 @@ public class PmsWebModule : AbpModule
 				return Task.CompletedTask;
 			};
 		});
-
-		//Configure<AbpAntiForgeryOptions>(options =>
-		//{
-		//    options.TokenCookie.SameSite = SameSiteMode.Lax;
-		//    options.TokenCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-		//});
 	}
 
 	private static bool IsApiRequest(HttpRequest request)
@@ -230,6 +306,7 @@ public class PmsWebModule : AbpModule
 
 	private static void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
 	{
+		// 配置 CORS 策略，允许前端应用跨域访问 API
 		var corsSettings = configuration.GetSection("Cors");
 		var allowedOrigins = corsSettings.GetSection("AllowedOrigins").Get<string[]>() ?? [];
 		var allowedMethods = corsSettings.GetSection("AllowedMethods").Get<string[]>() ?? ["GET"];
@@ -389,15 +466,12 @@ public class PmsWebModule : AbpModule
 		var app = context.GetApplicationBuilder();
         var env = context.GetEnvironment();
 
-        app.UseForwardedHeaders();
+		app.UseForwardedHeaders();
 
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
         }
-
-		// 异常处理中间件
-		app.UseApiExceptionHandler();
 
 		app.UseAbpRequestLocalization();
 

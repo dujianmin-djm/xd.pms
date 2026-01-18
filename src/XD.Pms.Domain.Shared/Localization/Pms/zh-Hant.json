@@ -34,7 +34,41 @@
     "Permission:Books.Delete": "Deleting the books",
     "Menu:Home": "Home",
     "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information visit",
-    "Welcome": "Welcome"
+    "Welcome": "Welcome",
+
+
+    "Auth:LoginSuccess": "登入成功",
+    "Auth:LogoutSuccess": "登出成功",
+    "Auth:TokenRefreshSuccess": "令牌刷新成功",
+    "Auth:InvalidCredentials": "使用者名稱或密碼錯誤",
+    "Auth:AccountLocked": "帳戶已被鎖定，請稍後再試或聯繫管理員",
+    "Auth:AccountDisabled": "帳戶已被停用，請聯繫管理員",
+    "Auth:AccountNotAllowed": "該帳戶不允許登入",
+    "Auth:AccountNotFound": "使用者不存在",
+    "Auth:RefreshTokenExpired": "登入已過期，請重新登入",
+    "Auth:RefreshTokenInvalid": "刷新令牌無效，請重新登入",
+    "Auth:TokenRevoked": "登入憑證已失效，請重新登入",
+    "Auth:Unauthorized": "未授權的訪問，請先登入",
+    "Auth:Forbidden": "沒有權限訪問此資源",
+    "Auth:NotFound": "請求的資源不存在",
+    "Auth:BadRequest": "不支持的請求方法",
+    "Auth:TooManyRequests": "請求過於頻繁，請稍後再試",
+    "Auth:ServerError": "伺服器內部錯誤，請稍後重試",
+    "Auth:TwoFactorRequired": "需要進行二次驗證",
+    "Auth:TwoFactorInvalid": "驗證碼錯誤，請重試",
+    "Auth:ClientConfigError": "用戶端配置錯誤，請聯繫管理員",
+    "Auth:InvalidScope": "請求的權限範圍無效",
+    "Auth:ClientUnauthorized": "用戶端未授權使用此認證方式",
+    "Auth:InvalidRequest": "請求參數錯誤",
+    "Auth:AccessDenied": "訪問被拒絕",
+    "Auth:AuthenticationFailed": "認證失敗，請稍後重試",
+    "Auth:GetTokenFailed": "獲取令牌失敗",
+
+    "Validation:Required": "{0}不能為空",
+    "Validation:StringLength": "{0}長度必須在{1}到{2}之間",
+    "Validation:InvalidFormat": "{0}格式不正確",
+
+    "Common:OperationSuccess": "操作成功",
+    "Common:OperationFailed": "操作失敗"
   }
 }
-

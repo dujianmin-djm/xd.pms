@@ -39,7 +39,41 @@
     "CopyrightInformation": "XundieSoftware All rights reserved.",
     "AbountUs": "AbountUs",
     "ShowPassword": "Show password",
-    "CapsLockon": "Caps lock on!"
+    "CapsLockon": "Caps lock on!",
+
+
+    "Auth:LoginSuccess": "Login successful.",
+    "Auth:LogoutSuccess": "Logout successful.",
+    "Auth:TokenRefreshSuccess": "Token refreshed successfully.",
+    "Auth:InvalidCredentials": "Invalid username or password.",
+    "Auth:AccountLocked": "Account has been locked, please try again later or contact administrator.",
+    "Auth:AccountDisabled": "Account has been disabled, please contact administrator.",
+    "Auth:AccountNotAllowed": "This account is not allowed to login.",
+    "Auth:AccountNotFound": "This account does not exist.",
+    "Auth:RefreshTokenExpired": "Login has expired, please login again.",
+    "Auth:RefreshTokenInvalid": "Refresh token is invalid, please login again.",
+    "Auth:TokenRevoked": "Login credentials have been invalidated, please login again.",
+    "Auth:Unauthorized": "Unauthorized access, please login first.",
+    "Auth:Forbidden": "Access denied, insufficient permissions.",
+    "Auth:NotFound": "The requested resource does not exist.",
+    "Auth:BadRequest": "Unsupported request method.",
+    "Auth:TooManyRequests": "The request is made too frequently. Please try again later.",
+    "Auth:ServerError": "Server internal error, please try again later.",
+    "Auth:TwoFactorRequired": "Two-factor authentication required.",
+    "Auth:TwoFactorInvalid": "Invalid verification code, please try again.",
+    "Auth:ClientConfigError": "Client configuration error, please contact administrator.",
+    "Auth:InvalidScope": "Invalid permission scope requested.",
+    "Auth:ClientUnauthorized": "Client is not authorized to use this authentication method.",
+    "Auth:InvalidRequest": "Invalid request parameters.",
+    "Auth:AccessDenied": "Access denied.",
+    "Auth:AuthenticationFailed": "Authentication failed, please try again later.",
+    "Auth:GetTokenFailed": "Failed to get token.",
+
+    "Validation:Required": "{0} is required.",
+    "Validation:StringLength": "{0} must be between {1} and {2} characters.",
+    "Validation:InvalidFormat": "{0} format is invalid.",
+
+    "Common:OperationSuccess": "Operation successful.",
+    "Common:OperationFailed": "Operation failed."
   }
 }
-

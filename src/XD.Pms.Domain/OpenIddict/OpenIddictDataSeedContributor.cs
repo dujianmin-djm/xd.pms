@@ -208,7 +208,7 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
                     OpenIddictConstants.GrantTypes.ClientCredentials,
                     OpenIddictConstants.GrantTypes.RefreshToken,
                     "LinkLogin",
-                    "Impersonation"
+					"Impersonation" //Token ÄÚÊ¡
                 ],
                 scopes: commonScopes,
                 redirectUris: [consoleAndAngularClientRootUrl],
