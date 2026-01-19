@@ -55,25 +55,3 @@ public class ApiResponse<T> : IApiResponse
 		return new ApiResponse<object>(code, false, default, message);
 	}
 }
-
-
-/// <summary>
-/// 无数据响应
-/// </summary>
-public class ApiResponse : ApiResponse<object>
-{
-	public ApiResponse() : base(ApiResponseCode.Success, true, null, "") { }
-
-	public ApiResponse(string code, bool success, object? data, string message)
-		: base(code, success, data, message) { }
-
-	public new static ApiResponse Succeed(bool isSuccess, object? data, string message = "")
-	{
-		return new ApiResponse(ApiResponseCode.Success, isSuccess, data, message);
-	}
-
-	public new static ApiResponse Fail(string code, string message)
-	{
-		return new ApiResponse(code, false, null, message);
-	}
-}

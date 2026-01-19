@@ -1,5 +1,4 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
-@using XD.Pms.Localization
-@inject IHtmlLocalizer<PmsResource> L
-<a class="nav-link" role="button" href="~/Account/Login">Login</a>
-
+@using Volo.Abp.Account.Localization
+@inject IHtmlLocalizer<AccountResource> L
+<a class="nav-link me-1 fw-bold text-white" role="button" href="~/Account/Login">@L["Login"]</a>

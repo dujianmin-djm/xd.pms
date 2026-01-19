@@ -84,5 +84,11 @@
         e.preventDefault();
         createModal.open();
     });
+
+
+    abp.ajax({
+        type: 'get',
+        url: abp.appPath + 'api/book/query?maxResultCount=2',
+    });
 });
 

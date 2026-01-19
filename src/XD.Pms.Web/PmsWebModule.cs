@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -109,7 +110,7 @@ public class PmsWebModule : AbpModule
 		{
 			serverBuilder.SetAccessTokenLifetime(TimeSpan.FromMinutes(accessTokenExpirationMinutes));
 			serverBuilder.SetRefreshTokenLifetime(TimeSpan.FromDays(refreshTokenExpirationDays));
-			serverBuilder.SetIdentityTokenLifetime(TimeSpan.FromMinutes(accessTokenExpirationMinutes));
+			//serverBuilder.SetIdentityTokenLifetime(null);
 
 			// ======== 启用 Reference Tokens ========
 			// Access Token 使用 Reference Token（存储在数据库，支持即时撤销）
@@ -140,14 +141,14 @@ public class PmsWebModule : AbpModule
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
 
-		// 显示详细身份认证错误信息（开发环境）
-		if (hostingEnvironment.IsDevelopment() && !configuration.GetValue<bool>("App:DisablePII"))
+		// 显示详细身份认证错误信息
+		if (!configuration.GetValue<bool>("App:DisablePII"))
         {
 			IdentityModelEventSource.ShowPII = true;
             IdentityModelEventSource.LogCompleteSecurityArtifact = true;
         }
 
-		// 禁用 HTTPS 要求（开发环境）
+		// 禁用 HTTPS 要求
 		if (!configuration.GetValue<bool>("AuthServer:RequireHttpsMetadata"))
         {
             Configure<OpenIddictServerAspNetCoreOptions>(options =>
@@ -194,17 +195,36 @@ public class PmsWebModule : AbpModule
         // 添加响应包装过滤器
         Configure<MvcOptions>(options =>
         {
-            options.Filters.Add<ApiResponseWrapperFilter>();
+            //options.Filters.Add<ApiResponseWrapperFilter>();
         });
 
         ConfigureCookieAuthentication();
 		ConfigureRequestLocalization();
+		ConfigureDataProtection(context, hostingEnvironment);
 
-		//Configure<AbpAntiForgeryOptions>(options =>
-		//{
-		//    options.TokenCookie.SameSite = SameSiteMode.Lax;
-		//    options.TokenCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-		//});
+		Configure<AbpAntiForgeryOptions>(options =>
+        {
+            options.TokenCookie.SameSite = SameSiteMode.Lax;
+            options.TokenCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        });
+    }
+
+	private static void ConfigureDataProtection(ServiceConfigurationContext context, IWebHostEnvironment hostingEnvironment)
+	{
+		if (!hostingEnvironment.IsDevelopment())
+        {
+			// 修复 IIS 重启程序池后密钥丢失导致已发放的 Antiforgery / Token 解密失败的问题
+			var keysFolder = Path.Combine(hostingEnvironment.ContentRootPath, "DataProtection-Keys");
+
+			if (!Directory.Exists(keysFolder))
+			{
+				Directory.CreateDirectory(keysFolder);
+			}
+
+			context.Services.AddDataProtection()
+				.SetApplicationName("PmsApp")
+				.PersistKeysToFileSystem(new DirectoryInfo(keysFolder));
+		}
 	}
 
 	private void ConfigureRequestLocalization()
@@ -241,13 +261,11 @@ public class PmsWebModule : AbpModule
 
                 // 按优先级添加 Provider
                 // 1. QueryString（支持 ?lang=xxx 和 ABP 默认的 ?culture=xxx）
-                providers.Add(new QueryStringRequestCultureProvider
+                providers.Add(queryStringProvider ?? new QueryStringRequestCultureProvider
                 {
                     QueryStringKey = "culture",
                     UIQueryStringKey = "ui-culture"
                 });
-
-                // 额外添加支持 ?lang=xxx
                 providers.Add(new QueryStringRequestCultureProvider
 				{
 					QueryStringKey = "lang",

@@ -29,10 +29,10 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 			}
 
 			// 包装响应
-			var wrappedResult = ApiResponse<object>.Succeed(true, objectResult.Value);
+			var wrappedResult = new ApiResponse<object>(objectResult.StatusCode.ToString() ?? "200", true, objectResult.Value);
 			context.Result = new ObjectResult(wrappedResult)
 			{
-				StatusCode = objectResult.StatusCode ?? 200
+				StatusCode = 200
 			};
 		}
 		else if (context.Result is EmptyResult)
@@ -49,6 +49,6 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 	private static bool IsApiRequest(ResultExecutingContext context)
 	{
 		var path = context.HttpContext.Request.Path.Value?.ToLower() ?? "";
-		return path.StartsWith("/api/");
+		return path.StartsWith("/api/") && !path.StartsWith("/api/app/") && !path.StartsWith("/api/identity/");
 	}
 }
