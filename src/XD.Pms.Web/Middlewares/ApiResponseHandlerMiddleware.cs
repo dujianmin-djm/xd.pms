@@ -18,10 +18,10 @@ namespace XD.Pms.Web.Middlewares;
 /// <summary>
 /// API 异常处理中间件
 /// </summary>
-public class ApiExceptionHandlerMiddleware
+public class ApiResponseHandlerMiddleware
 {
 	private readonly RequestDelegate _next;
-	private readonly ILogger<ApiExceptionHandlerMiddleware> _logger;
+	private readonly ILogger<ApiResponseHandlerMiddleware> _logger;
 
 	private static readonly JsonSerializerOptions JsonOptions = new()
 	{
@@ -29,7 +29,7 @@ public class ApiExceptionHandlerMiddleware
 		WriteIndented = false
 	};
 
-	public ApiExceptionHandlerMiddleware(RequestDelegate next, ILogger<ApiExceptionHandlerMiddleware> logger)
+	public ApiResponseHandlerMiddleware(RequestDelegate next, ILogger<ApiResponseHandlerMiddleware> logger)
 	{
 		_next = next;
 		_logger = logger;
