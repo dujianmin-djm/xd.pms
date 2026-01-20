@@ -6,8 +6,6 @@ using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Repositories;
-using XD.Pms.ApiResponse;
-using XD.Pms.Authentication;
 using XD.Pms.Permissions;
 
 namespace XD.Pms.Books;
@@ -30,9 +28,6 @@ public class BookAppService : PmsAppService, IBookAppService
 
     public async Task<PagedResultDto<BookDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
-        string message = L["Auth:ClientUnauthorized"].Value;
-
-
 		var queryable = await _repository.GetQueryableAsync();
 			//.WhereIf(!input.Filter.IsNullOrWhiteSpace(), book => book.Name.Contains(input.Filter));
         var query = queryable

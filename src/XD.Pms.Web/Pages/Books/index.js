@@ -88,7 +88,7 @@
 
     abp.ajax({
         type: 'get',
-        url: abp.appPath + 'api/book/query?maxResultCount=2',
+        url: abp.appPath + 'papi/book/query?maxResultCount=2',
     });
 });
 

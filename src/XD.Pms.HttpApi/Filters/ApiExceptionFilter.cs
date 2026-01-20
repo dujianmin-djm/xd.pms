@@ -30,15 +30,12 @@ public class ApiExceptionFilter : AbpExceptionFilter
 {
 	protected override async Task HandleAndWrapException(ExceptionContext context)
 	{
-		// 判断是否是 API 请求
 		if (!IsApiRequest(context.HttpContext))
 		{
-			// 非 API 请求，使用 ABP 默认处理
 			await base.HandleAndWrapException(context);
 			return;
 		}
 
-		// API 请求，使用自定义格式
 		await HandleApiExceptionAsync(context);
 	}
 
@@ -61,7 +58,7 @@ public class ApiExceptionFilter : AbpExceptionFilter
 		// 构建自定义响应
 		var (code, message) = ConvertException(context.Exception, localizer);
 
-		var response = new ApiResponse<object>(code, false, null, message);
+		var response = ApiResponse<object>.Fail(code, message);
 
 		// 设置响应
 		context.HttpContext.Response.StatusCode = 200;  // 始终返回 200
@@ -74,9 +71,7 @@ public class ApiExceptionFilter : AbpExceptionFilter
 	/// <summary>
 	/// 转换异常为错误码和消息
 	/// </summary>
-	private static (string Code, string Message) ConvertException(
-		Exception exception,
-		IStringLocalizer<PmsResource> localizer)
+	private static (string Code, string Message) ConvertException(Exception exception, IStringLocalizer<PmsResource> localizer)
 	{
 		return exception switch
 		{
@@ -157,26 +152,6 @@ public class ApiExceptionFilter : AbpExceptionFilter
 	private static bool IsApiRequest(HttpContext context)
 	{
 		var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";
-
-		// 路径判断
-		if (path.StartsWith("/api/"))
-		{
-			return true;
-		}
-
-		// AJAX 请求
-		if (context.Request.Headers.XRequestedWith == "XMLHttpRequest")
-		{
-			return true;
-		}
-
-		// Accept 头判断
-		var accept = context.Request.Headers.Accept.ToString();
-		if (accept.Contains("application/json") && !accept.Contains("text/html"))
-		{
-			return true;
-		}
-
-		return false;
+		return path.StartsWith("/papi/");
 	}
 }

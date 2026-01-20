@@ -8,7 +8,7 @@ using XD.Pms.Authentication.Dto;
 namespace XD.Pms.Controllers;
 
 [Area("app")]
-[Route("api/auth")]
+[Route("papi/auth")]
 public class AuthController(ITokenAppService tokenAppService) : PmsControllerBase
 {
 	private readonly ITokenAppService _tokenAppService = tokenAppService;
@@ -27,16 +27,16 @@ public class AuthController(ITokenAppService tokenAppService) : PmsControllerBas
 	/// <summary>
 	/// 刷新令牌
 	/// </summary>
-	[HttpPost("refresh")]
+	[HttpPost("refresh-token")]
 	[AllowAnonymous]
-	public async Task<ActionResult<ApiResponse<TokenResponseDto>>> RefreshTokenAsync([FromBody] RefreshTokenRequestDto input)
+	public async Task<ActionResult<ApiResponse<LoginResponseDto>>> RefreshTokenAsync([FromBody] RefreshTokenRequestDto input)
 	{
 		var result = await _tokenAppService.RefreshTokenAsync(input);
-		return Ok(ApiResponse<TokenResponseDto>.Succeed(true, result, L["Auth:TokenRefreshSuccess"].Value));
+		return Ok(ApiResponse<LoginResponseDto>.Succeed(true, result, L["Auth:TokenRefreshSuccess"].Value));
 	}
 
 	/// <summary>
-	/// 登出（撤销令牌），撤销当前访问令牌，使其失效
+	/// 登出，撤销当前访问令牌
 	/// </summary>
 	[HttpPost("logout")]
 	[Authorize]
@@ -44,6 +44,17 @@ public class AuthController(ITokenAppService tokenAppService) : PmsControllerBas
 	{
 		await _tokenAppService.RevokeTokenAsync();
 		return Ok(ApiResponse<object>.Succeed(true, null, L["Auth:LogoutSuccess"].Value));
+	}
+
+	/// <summary>
+	/// 撤销指定访问令牌
+	/// </summary>
+	[HttpPost("revoke-token")]
+	[Authorize]
+	public async Task<ActionResult<ApiResponse<object>>> RevokeTokenAsync([FromBody] RevokeTokenRequestDto input)
+	{
+		await _tokenAppService.RevokeTokenAsync(input.AccessToken);
+		return Ok(ApiResponse<object>.Succeed(true, null, L["Auth:TokenRevokeSuccess"].Value));
 	}
 
 	/// <summary>

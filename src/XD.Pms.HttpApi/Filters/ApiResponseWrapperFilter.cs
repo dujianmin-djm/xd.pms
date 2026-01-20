@@ -12,7 +12,6 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 {
 	public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 	{
-		// 只处理 API 请求
 		if (!IsApiRequest(context))
 		{
 			await next();
@@ -21,14 +20,12 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 
 		if (context.Result is ObjectResult objectResult)
 		{
-			// 如果已经是 ApiResponse 类型，不再包装
 			if (objectResult.Value is IApiResponse)
 			{
 				await next();
 				return;
 			}
 
-			// 包装响应
 			var wrappedResult = new ApiResponse<object>(objectResult.StatusCode.ToString() ?? "200", true, objectResult.Value);
 			context.Result = new ObjectResult(wrappedResult)
 			{
@@ -49,6 +46,6 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 	private static bool IsApiRequest(ResultExecutingContext context)
 	{
 		var path = context.HttpContext.Request.Path.Value?.ToLower() ?? "";
-		return path.StartsWith("/api/") && !path.StartsWith("/api/app/") && !path.StartsWith("/api/identity/");
+		return path.StartsWith("/papi/");
 	}
 }

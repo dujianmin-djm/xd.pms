@@ -6,7 +6,7 @@ using XD.Pms.Books;
 
 namespace XD.Pms.Controllers;
 
-[Route("api/book")]
+[Route("papi/book")]
 public class BookController : PmsControllerBase
 {
 	private readonly IBookAppService _bookAppService;

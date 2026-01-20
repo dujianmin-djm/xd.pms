@@ -146,6 +146,11 @@ public static class ApiResponseCode
 
 	#endregion
 
+	/// <summary>
+	/// 方法不允许
+	/// </summary>
+	public const string MethodNotAllowed = "405";
+
 	#region 资源错误 (404xx)
 
 	/// <summary>

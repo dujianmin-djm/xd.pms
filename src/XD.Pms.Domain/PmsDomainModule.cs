@@ -35,7 +35,7 @@ public class PmsDomainModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
-
+		// 禁用特定数据种子
 		//Configure<AbpDataSeedOptions>(options =>
 		//{
 		//	options.Contributors.Remove<PmsDataSeederContributor>();
@@ -45,7 +45,7 @@ public class PmsDomainModule : AbpModule
 
 
 #if DEBUG
-		//context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
+		context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
 #endif
     }
 }

@@ -55,6 +55,7 @@ using XD.Pms.Permissions;
 using XD.Pms.Web.Authentication;
 using XD.Pms.Web.HealthChecks;
 using XD.Pms.Web.Menus;
+using XD.Pms.Web.Middlewares;
 
 namespace XD.Pms.Web;
 
@@ -195,7 +196,7 @@ public class PmsWebModule : AbpModule
         // 添加响应包装过滤器
         Configure<MvcOptions>(options =>
         {
-            //options.Filters.Add<ApiResponseWrapperFilter>();
+            options.Filters.Add<ApiResponseWrapperFilter>();
         });
 
         ConfigureCookieAuthentication();
@@ -204,7 +205,13 @@ public class PmsWebModule : AbpModule
 
 		Configure<AbpAntiForgeryOptions>(options =>
         {
-            options.TokenCookie.SameSite = SameSiteMode.Lax;
+			// 禁用基于 Cookie 的防伪造验证 (适用 JWT 纯 API 场景，没有 Razor Pages/MVC 视图)
+			options.AutoValidate = true;
+			options.AutoValidateFilter = type => type.Namespace?.Contains("Controllers") != true;
+
+			// 设置 AntiForgery Cookie 策略
+            options.TokenCookie.Name = "Pms.AntiForgery.XSRF-TOKEN";
+			options.TokenCookie.SameSite = SameSiteMode.Lax;
             options.TokenCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         });
     }
@@ -317,9 +324,7 @@ public class PmsWebModule : AbpModule
 	private static bool IsApiRequest(HttpRequest request)
 	{
 		var path = request.Path.Value?.ToLower() ?? "";
-		return path.StartsWith("/api/") ||
-			   request.Headers.XRequestedWith.ToString() == "XMLHttpRequest" ||
-			   request.Headers.Accept.ToString().Contains("application/json");
+		return path.StartsWith("/papi/");
 	}
 
 	private static void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
@@ -493,7 +498,10 @@ public class PmsWebModule : AbpModule
 
 		app.UseAbpRequestLocalization();
 
-        if (!env.IsDevelopment())
+        app.UseApiExceptionHandler();
+
+
+		if (!env.IsDevelopment())
         {
             //app.UseErrorPage();
             //app.UseHsts();

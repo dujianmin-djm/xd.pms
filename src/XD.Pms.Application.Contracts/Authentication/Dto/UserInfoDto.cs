@@ -58,6 +58,11 @@ public class UserInfoDto
 	public string[] Roles { get; set; } = [];
 
 	/// <summary>
+	/// 按钮权限列表
+	/// </summary>
+	public string[] Buttons { get; set; } = [];
+
+	/// <summary>
 	/// 租户ID
 	/// </summary>
 	public Guid? TenantId { get; set; }

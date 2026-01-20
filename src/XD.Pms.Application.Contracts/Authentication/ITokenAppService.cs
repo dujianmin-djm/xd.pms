@@ -13,7 +13,7 @@ public interface ITokenAppService
 	/// <summary>
 	/// 刷新令牌
 	/// </summary>
-	Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto input);
+	Task<LoginResponseDto> RefreshTokenAsync(RefreshTokenRequestDto input);
 
 	/// <summary>
 	/// 撤销令牌（登出）

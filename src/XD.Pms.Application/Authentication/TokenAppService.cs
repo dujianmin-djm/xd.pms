@@ -50,7 +50,6 @@ public class TokenAppService : PmsAppService, ITokenAppService
 	/// </summary>
 	public async Task<LoginResponseDto> LoginAsync(LoginRequestDto input)
 	{
-		// 构建请求参数
 		var clientId = input.ClientId ?? GetDefaultClientId();
 		var scope = input.Scope ?? "openid profile email phone roles Pms offline_access";
 
@@ -65,57 +64,13 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			["scope"] = scope
 		};
 
-		// 调用 OpenIddict Token 端点
-		var tokenResponse = await RequestTokenAsync(tokenEndpoint, requestData, "login");
-
-		// 获取用户信息
-		var user = await _userManager.FindByNameAsync(input.UserNameOrEmail)
-				   ?? await _userManager.FindByEmailAsync(input.UserNameOrEmail)
-				   ?? throw new AuthenticationException(ApiResponseCode.InvalidCredentials, L["Auth:AccountNotFound"].Value);
-		
-		if (!user.IsActive)
-		{
-			throw new AuthenticationException(ApiResponseCode.InvalidCredentials, L["Auth:AccountDisabled"].Value);
-		}
-
-		if (await _userManager.IsLockedOutAsync(user))
-		{
-			throw new AuthenticationException(ApiResponseCode.InvalidCredentials, L["Auth:AccountLocked"].Value);
-		}
-
-		var roles = await _userManager.GetRolesAsync(user);
-
-		return new LoginResponseDto
-		{
-			AccessToken = tokenResponse.AccessToken,
-			RefreshToken = tokenResponse.RefreshToken,
-			TokenType = tokenResponse.TokenType ?? "Bearer",
-			ExpiresIn = tokenResponse.ExpiresIn,
-			AccessTokenExpiration = Clock.Now.AddSeconds(tokenResponse.ExpiresIn),
-			RefreshTokenExpiration = Clock.Now.AddDays(_tokenSettings.RefreshTokenExpirationDays),
-			Scope = tokenResponse.Scope,
-			Language = CultureInfo.CurrentCulture.Name,
-			User = new UserInfoDto
-			{
-				Id = user.Id,
-				UserName = user.UserName!,
-				Email = user.Email,
-				EmailConfirmed = user.EmailConfirmed,
-				Name = user.Name,
-				Surname = user.Surname,
-				PhoneNumber = user.PhoneNumber,
-				PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-				TwoFactorEnabled = user.TwoFactorEnabled,
-				Roles = [.. roles],
-				TenantId = user.TenantId
-			}
-		};
+		return await GetRequestTokenResponseAsync(tokenEndpoint, requestData, "login");
 	}
 
 	/// <summary>
 	/// 刷新令牌
 	/// </summary>
-	public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto input)
+	public async Task<LoginResponseDto> RefreshTokenAsync(RefreshTokenRequestDto input)
 	{
 		var clientId = input.ClientId ?? GetDefaultClientId();
 		var tokenEndpoint = GetTokenEndpoint();
@@ -127,19 +82,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			["refresh_token"] = input.RefreshToken
 		};
 
-		var tokenResponse = await RequestTokenAsync(tokenEndpoint, requestData, "refresh");
-
-		return new TokenResponseDto
-		{
-			AccessToken = tokenResponse.AccessToken,
-			RefreshToken = tokenResponse.RefreshToken,
-			TokenType = tokenResponse.TokenType ?? "Bearer",
-			ExpiresIn = tokenResponse.ExpiresIn,
-			AccessTokenExpiration = Clock.Now.AddSeconds(tokenResponse.ExpiresIn),
-			RefreshTokenExpiration = Clock.Now.AddDays(_tokenSettings.RefreshTokenExpirationDays),
-			Scope = tokenResponse.Scope,
-			Language = CultureInfo.CurrentCulture.Name
-		};
+		return await GetRequestTokenResponseAsync(tokenEndpoint, requestData, "refresh");
 	}
 
 	/// <summary>
@@ -160,7 +103,6 @@ public class TokenAppService : PmsAppService, ITokenAppService
 
 		if (!string.IsNullOrEmpty(jti) && expiration.HasValue)
 		{
-			// 加入黑名单
 			await _tokenBlacklistService.AddToBlacklistAsync(jti, expiration.Value);
 		}
 
@@ -213,13 +155,13 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			PhoneNumberConfirmed = user.PhoneNumberConfirmed,
 			TwoFactorEnabled = user.TwoFactorEnabled,
 			Roles = [.. roles],
+			Buttons = [],
 			TenantId = user.TenantId
 		};
 	}
 
-	#region 私有方法
 
-	private async Task<OpenIddictTokenResponse> RequestTokenAsync(string endpoint, Dictionary<string, string> data, string operation)
+	private async Task<LoginResponseDto> GetRequestTokenResponseAsync(string endpoint, Dictionary<string, string> data, string operation)
 	{
 		var client = _httpClientFactory.CreateClient();
 		var content = new FormUrlEncodedContent(data);
@@ -242,26 +184,30 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			throw new AuthenticationException(ApiResponseCode.InternalError, L["Auth:GetTokenFailed"].Value);
 		}
 
-		return tokenResponse;
+		return new LoginResponseDto
+		{
+			AccessToken = tokenResponse.AccessToken,
+			RefreshToken = tokenResponse.RefreshToken,
+			TokenType = tokenResponse.TokenType ?? "Bearer",
+			ExpiresIn = tokenResponse.ExpiresIn,
+			AccessTokenExpiration = Clock.Now.AddSeconds(tokenResponse.ExpiresIn),
+			RefreshTokenExpiration = Clock.Now.AddDays(_tokenSettings.RefreshTokenExpirationDays),
+			Scope = tokenResponse.Scope,
+			Language = CultureInfo.CurrentCulture.Name
+		};
 	}
 
 	private string GetTokenEndpoint()
 	{
 		var request = _httpContextAccessor.HttpContext.Request;
-
-		var authority = _configuration["AuthServer:Authority"]?.TrimEnd('/')
-						?? $"{request.Scheme}://{request.Host}";
-
+		var authority = $"{request.Scheme}://{request.Host}";
 		return $"{authority}/connect/token";
 	}
 
 	private string GetRevocationEndpoint()
 	{
 		var request = _httpContextAccessor.HttpContext.Request;
-
-		var authority = _configuration["AuthServer:Authority"]?.TrimEnd('/')
-						?? $"{request.Scheme}://{request.Host}";
-
+		var authority = $"{request.Scheme}://{request.Host}";
 		return $"{authority}/connect/revocation";
 	}
 
@@ -371,7 +317,6 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		}
 	}
 
-	#endregion
 
 	#region 辅助类
 
