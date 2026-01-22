@@ -38,11 +38,6 @@ public class LoginResponseDto
 	public DateTime RefreshTokenExpiration { get; set; }
 
 	/// <summary>
-	/// 权限范围
-	/// </summary>
-	public string? Scope { get; set; }
-
-	/// <summary>
 	/// 语言标识
 	/// </summary>
 	public string? Language { get; set; }

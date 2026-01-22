@@ -23,34 +23,9 @@ public class UserInfoDto
 	public string? Email { get; set; }
 
 	/// <summary>
-	/// 邮箱是否已验证
-	/// </summary>
-	public bool EmailConfirmed { get; set; }
-
-	/// <summary>
-	/// 名字
-	/// </summary>
-	public string? Name { get; set; }
-
-	/// <summary>
-	/// 姓氏
-	/// </summary>
-	public string? Surname { get; set; }
-
-	/// <summary>
 	/// 电话号码
 	/// </summary>
 	public string? PhoneNumber { get; set; }
-
-	/// <summary>
-	/// 电话是否已验证
-	/// </summary>
-	public bool PhoneNumberConfirmed { get; set; }
-
-	/// <summary>
-	/// 是否启用双因素认证
-	/// </summary>
-	public bool TwoFactorEnabled { get; set; }
 
 	/// <summary>
 	/// 用户角色列表
@@ -61,9 +36,4 @@ public class UserInfoDto
 	/// 按钮权限列表
 	/// </summary>
 	public string[] Buttons { get; set; } = [];
-
-	/// <summary>
-	/// 租户ID
-	/// </summary>
-	public Guid? TenantId { get; set; }
 }

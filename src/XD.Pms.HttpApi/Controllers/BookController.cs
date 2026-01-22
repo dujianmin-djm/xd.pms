@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using XD.Pms.ApiResponse;
@@ -24,6 +25,7 @@ public class BookController : PmsControllerBase
 	}
 
 	[HttpGet("query2")]
+	[Authorize]
 	public async Task<ApiResponse<PagedResultDto<BookDto>>> GetListAsync2([FromQuery] PagedAndSortedResultRequestDto input)
 	{
 		var result = await _bookAppService.GetListAsync(input);

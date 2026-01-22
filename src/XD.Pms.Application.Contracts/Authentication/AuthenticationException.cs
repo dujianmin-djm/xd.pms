@@ -9,7 +9,8 @@ public class AuthenticationException : BusinessException
 {
 	public string ErrorCode { get; }
 
-	public AuthenticationException(string code, string message) : base(message: message)
+	public AuthenticationException(string code, string message, string? details = null) 
+		: base(message: message, details: details)
 	{
 		ErrorCode = code;
 	}

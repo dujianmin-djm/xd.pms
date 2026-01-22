@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Mvc;
@@ -42,28 +44,32 @@ public class ApiExceptionFilter : AbpExceptionFilter
 	/// <summary>
 	/// 处理 API 异常
 	/// </summary>
-	private async Task HandleApiExceptionAsync(ExceptionContext context)
+	private static async Task HandleApiExceptionAsync(ExceptionContext context)
 	{
 		// 记录异常
-		LogException(context, out _);
+		var apiErrorInfoBuilder = new StringBuilder();
+		apiErrorInfoBuilder.AppendLine("---------- ApiExceptionErrorInfo ----------");
+		apiErrorInfoBuilder.AppendLine($"Request Path: {context.HttpContext.Request.Path}");
+		if (context.Exception is BusinessException bizEx && !bizEx.Details.IsNullOrEmpty())
+		{
+			apiErrorInfoBuilder.Append(bizEx.Details);
+		}
+		var logger = context.GetService<ILogger<ApiExceptionFilter>>()!;
+		logger.LogWarning(context.Exception, "{ApiExceptionErrorInfo}", apiErrorInfoBuilder.ToString());
 
 		// 通知异常
 		await context.GetRequiredService<IExceptionNotifier>()
 			.NotifyAsync(new ExceptionNotificationContext(context.Exception));
 
 		// 获取本地化器
-		var localizer = context.HttpContext.RequestServices
-			.GetRequiredService<IStringLocalizer<PmsResource>>();
+		var localizer = context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<PmsResource>>();
 
 		// 构建自定义响应
 		var (code, message) = ConvertException(context.Exception, localizer);
-
 		var response = ApiResponse<object>.Fail(code, message);
 
-		// 设置响应
-		context.HttpContext.Response.StatusCode = 200;  // 始终返回 200
-		context.HttpContext.Response.Headers.Remove(AbpHttpConsts.AbpErrorFormat);  // 移除 ABP 错误头
-
+		context.HttpContext.Response.StatusCode = 200;
+		context.HttpContext.Response.Headers.Remove(AbpHttpConsts.AbpErrorFormat);
 		context.Result = new ObjectResult(response);
 		context.ExceptionHandled = true;
 	}
@@ -104,8 +110,8 @@ public class ApiExceptionFilter : AbpExceptionFilter
 				=> (ApiResponseCode.ValidationError, argEx.Message),
 
 			// 操作取消
-			OperationCanceledException
-				=> (ApiResponseCode.BadRequest, "Operation Canceled"),
+			OperationCanceledException ocEx
+				=> (ApiResponseCode.BadRequest, ocEx.Message),
 
 			// 未知异常
 			_ => (ApiResponseCode.InternalError, localizer["Auth:ServerError"].Value)

@@ -56,59 +56,54 @@ public static class ApiResponseCode
 	public const string AccessTokenExpired = "40101";
 
 	/// <summary>
-	/// Refresh Token 已过期（需要重新登录）
+	/// Access Token 无效或已被撤销
 	/// </summary>
-	public const string RefreshTokenExpired = "40102";
+	public const string AccessTokenInvalid = "40102";
 
 	/// <summary>
-	/// Token 无效或已被撤销
+	/// Refresh Token 已过期（需要重新登录）
 	/// </summary>
-	public const string TokenInvalid = "40103";
+	public const string RefreshTokenExpired = "40103";
+
+	/// <summary>
+	/// Refresh Token 已被使用（可能存在重放攻击，需重新登录）
+	/// </summary>
+	public const string RefreshTokenRedeemed = "40104";
+
+	/// <summary>
+	/// Refresh Token 无效
+	/// </summary>
+	public const string RefreshTokenInvalid = "40105";
 
 	/// <summary>
 	/// 用户名或密码错误
 	/// </summary>
-	public const string InvalidCredentials = "40104";
+	public const string InvalidCredentials = "40106";
 
 	/// <summary>
 	/// 账户已被锁定（登录失败次数过多）
 	/// </summary>
-	public const string AccountLocked = "40105";
+	public const string AccountLocked = "40107";
 
 	/// <summary>
 	/// 账户已被禁用
 	/// </summary>
-	public const string AccountDisabled = "40106";
-
-	/// <summary>
-	/// 账户未激活
-	/// </summary>
-	public const string AccountNotActivated = "40107";
-
-	/// <summary>
-	/// 需要二次验证
-	/// </summary>
-	public const string TwoFactorRequired = "40108";
-
-	/// <summary>
-	/// 二次验证码错误
-	/// </summary>
-	public const string TwoFactorInvalid = "40109";
+	public const string AccountDisabled = "40108";
 
 	/// <summary>
 	/// 强制登出（如：密码已修改、被管理员踢出）
 	/// </summary>
-	public const string ForceLogout = "40110";
+	public const string ForceLogout = "40109";
 
 	/// <summary>
 	/// 会话已过期
 	/// </summary>
-	public const string SessionExpired = "40111";
+	public const string SessionExpired = "40110";
 
 	/// <summary>
 	/// 登录设备数量超限
 	/// </summary>
-	public const string TooManyDevices = "40112";
+	public const string TooManyDevices = "40111";
 
 	#endregion
 
@@ -146,11 +141,6 @@ public static class ApiResponseCode
 
 	#endregion
 
-	/// <summary>
-	/// 方法不允许
-	/// </summary>
-	public const string MethodNotAllowed = "405";
-
 	#region 资源错误 (404xx)
 
 	/// <summary>
@@ -174,6 +164,11 @@ public static class ApiResponseCode
 	public const string ApiNotFound = "40403";
 
 	#endregion
+
+	/// <summary>
+	/// 方法不允许
+	/// </summary>
+	public const string MethodNotAllowed = "405";
 
 	#region 业务错误 (409xx) - 冲突/业务规则
 
@@ -315,7 +310,7 @@ public static class ApiResponseCodeHelper
 	/// </summary>
 	public static bool RequiresReLogin(string code) => code is
 		ApiResponseCode.RefreshTokenExpired or
-		ApiResponseCode.TokenInvalid or
+		ApiResponseCode.AccessTokenInvalid or
 		ApiResponseCode.AccountLocked or
 		ApiResponseCode.AccountDisabled or
 		ApiResponseCode.ForceLogout or

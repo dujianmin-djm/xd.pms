@@ -118,6 +118,10 @@ public class ApiResponseHandlerMiddleware
 			OperationCanceledException ocEx
 				=> (ApiResponseCode.BadRequest, ocEx.Message),
 
+			// 非法操作
+			InvalidOperationException ioEx
+				=> (ApiResponseCode.BadRequest, ioEx.Message),
+
 			// 参数异常
 			ArgumentException argEx
 				=> (ApiResponseCode.ValidationError, argEx.Message),
