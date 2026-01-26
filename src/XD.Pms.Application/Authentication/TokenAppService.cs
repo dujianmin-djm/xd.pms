@@ -142,7 +142,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		}
 
 		var user = await _userManager.FindByIdAsync(CurrentUser.Id.Value.ToString())
-			?? throw new AuthenticationException(ApiResponseCode.AccountNotFound, L["Auth:AccountNotFound"].Value);
+			?? throw new AuthenticationException(ApiResponseCode.BadRequest, L["Auth:AccountNotFound"].Value);
 
 		var roles = await _userManager.GetRolesAsync(user);
 
@@ -226,37 +226,36 @@ public class TokenAppService : PmsAppService, ITokenAppService
 
 	private (string Code, string Message) GetFriendlyTokenError(string? error, string? description, string operation)
 	{
-		return (error, operation) switch
+		return (error, operation, description) switch
 		{
 			// ==================== 登录场景 ====================
-			("account_locked", "login")
+			("account_locked", "login", _)
 				=> (ApiResponseCode.AccountLocked, L["Auth:AccountLocked"].Value),
 
-			("account_inactive", "login")
+			("account_inactive", "login", _)
 				=> (ApiResponseCode.AccountDisabled, L["Auth:AccountDisabled"].Value),
 
-			("invalid_grant", "login")
+			("invalid_grant", "login", _)
 				=> (ApiResponseCode.InvalidCredentials, L["Auth:InvalidCredentials"].Value),
 
 			// ==================== 刷新 Token 场景 ====================
-			("invalid_grant", "refresh") when description == "The specified refresh token is no longer valid."
+			("invalid_grant", "refresh", "The specified refresh token is no longer valid.")
 				=> (ApiResponseCode.RefreshTokenExpired, L["Auth:RefreshTokenExpired"].Value),
 
-			("invalid_grant", "refresh") when description == "The specified refresh token has already been redeemed."
+			("invalid_grant", "refresh", "The specified refresh token has already been redeemed.")
 				=> (ApiResponseCode.RefreshTokenRedeemed, L["Auth:RefreshTokenRedeemed"].Value),
 
-			("invalid_grant", "refresh")
-				=> (ApiResponseCode.RefreshTokenInvalid, L["Auth:RefreshTokenInvalid"].Value),
+			("invalid_grant", "refresh", _)
+				=> (ApiResponseCode.SessionExpired, L["Auth:RefreshTokenInvalid"].Value),
 
-			// ==================== 通用错误 ====================
-			("invalid_client", _)
+			// ==================== 其他错误 ====================
+			("invalid_client", _, _)
 				=> (ApiResponseCode.BadRequest, description ?? L["Auth:ClientConfigError"].Value),
 
-			("invalid_scope", _)
-				=> (ApiResponseCode.BadRequest, L["Auth:InvalidScope"].Value),
+			("invalid_scope", _, _) => (ApiResponseCode.BadRequest, description ?? L["Auth:InvalidScope"].Value),
 
 			// 默认错误
-			_ => (ApiResponseCode.Forbidden, error + ";" + description ?? L["Auth:AuthenticationFailed"].Value)
+			_ => (ApiResponseCode.Forbidden, $"{error}: {description}" ?? L["Auth:AuthenticationFailed"].Value)
 		};
 	}
 
@@ -265,16 +264,13 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		try
 		{
 			var handler = new JwtSecurityTokenHandler();
-
 			if (!handler.CanReadToken(token))
 			{
 				return (null, null);
 			}
-
 			var jwtToken = handler.ReadJwtToken(token);
 			var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
 			var exp = jwtToken.ValidTo;
-
 			return (jti, exp);
 		}
 		catch

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
-using OpenIddict.Abstractions;
 using OpenIddict.Validation;
 using System;
 using System.IdentityModel.Tokens.Jwt;
@@ -31,29 +30,39 @@ public class TokenBlacklistValidationHandler : IOpenIddictValidationHandler<Open
 		{
 			return;
 		}
-
-		var handler = new JwtSecurityTokenHandler();
-		var jwtToken = handler.ReadJwtToken(accessToken);
-
-		// 获取 JTI claim
-		var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
-		if (string.IsNullOrEmpty(jti))
+		try
 		{
-			return;
+			var handler = new JwtSecurityTokenHandler();
+			if (!handler.CanReadToken(accessToken))
+			{
+				return;
+			}
+			var jwtToken = handler.ReadJwtToken(accessToken);
+			var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
+			if (string.IsNullOrEmpty(jti))
+			{
+				return;
+			}
+
+			var httpContext = context.Transaction.GetHttpRequest()?.HttpContext;
+			if (httpContext == null)
+			{
+				return;
+			}
+			// 检查 access token 是否在黑名单
+			var blacklistService = httpContext.RequestServices.GetService<ITokenBlacklistService>();
+			if (blacklistService != null && await blacklistService.IsBlacklistedAsync(jti))
+			{
+				var localizer = httpContext.RequestServices.GetService<IStringLocalizer<PmsResource>>();
+				context.Reject(
+					error: "access_token_revoked",
+					description: localizer?["Auth:AccessTokenRevoked"]?.Value ?? "The access token has been revoked."
+				);
+			}
 		}
-
-		// 检查黑名单
-		var blacklistService = context.Transaction.GetHttpRequest()?.HttpContext
-			.RequestServices.GetService<ITokenBlacklistService>();
-
-		if (blacklistService != null && await blacklistService.IsBlacklistedAsync(jti))
+		catch
 		{
-			var localizer = context.Transaction.GetHttpRequest()?.HttpContext
-				.RequestServices.GetService<IStringLocalizer<PmsResource>>();
-			context.Reject(
-				error: OpenIddictConstants.Errors.InvalidToken,
-				description: localizer?["Auth:TokenRevoked"]?.Value ?? "The token has been revoked."
-			);
+			// 忽略解析错误，让后续处理程序处理
 		}
 	}
 }

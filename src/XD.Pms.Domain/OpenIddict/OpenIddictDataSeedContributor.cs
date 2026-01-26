@@ -178,7 +178,7 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
 				displayName: "内部服务调用",
 				secret: serviceSecret,
 				grantTypes: [OpenIddictConstants.GrantTypes.ClientCredentials],
-				scopes: ["Pms"],
+				scopes: ["Pms"],    //通常只需要API作用域
 				redirectUris: null,
 				postLogoutRedirectUris: null,
 				clientUri: null,

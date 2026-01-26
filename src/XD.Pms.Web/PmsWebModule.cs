@@ -99,7 +99,8 @@ public class PmsWebModule : AbpModule
                 options.UseLocalServer();
                 options.UseAspNetCore();
 
-				// 添加黑名单验证处理器
+				// 添加事件验证处理器
+				options.AddEventHandler(CustomTokenValidationHandler.Descriptor);
 				options.AddEventHandler(TokenBlacklistValidationHandler.Descriptor);
 			});
         });
@@ -211,7 +212,7 @@ public class PmsWebModule : AbpModule
 			options.AutoValidateFilter = type => type.Namespace?.Contains("Controllers") != true;
 
 			// 设置 AntiForgery Cookie 策略
-            options.TokenCookie.Name = "Pms.AntiForgery.XSRF-TOKEN";
+            options.TokenCookie.Name = "PMS.XSRF-TOKEN";
 			options.TokenCookie.SameSite = SameSiteMode.Lax;
             options.TokenCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         });
