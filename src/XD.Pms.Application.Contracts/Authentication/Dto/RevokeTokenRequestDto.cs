@@ -7,6 +7,6 @@ public class RevokeTokenRequestDto
 	/// <summary>
 	/// 访问令牌
 	/// </summary>
-	[Required(ErrorMessage = "访问令牌不能为空")]
+	[Required]
 	public required string AccessToken { get; set; }
 }

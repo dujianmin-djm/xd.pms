@@ -10,11 +10,11 @@ public class RefreshTokenRequestDto
 	/// <summary>
 	/// 刷新令牌
 	/// </summary>
-	[Required(ErrorMessage = "刷新令牌不能为空")]
+	[Required]
 	public string RefreshToken { get; set; } = default!;
 
 	/// <summary>
-	/// 客户端标识（可选）
+	/// 客户端标识
 	/// </summary>
 	public string? ClientId { get; set; }
 }

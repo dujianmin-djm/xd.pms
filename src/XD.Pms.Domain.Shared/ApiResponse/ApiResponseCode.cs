@@ -30,8 +30,6 @@ public static class ApiResponseCode
 	/// </summary>
 	public const string RefreshTokenRedeemed = "8888";
 
-	public const string SessionExpired = "8888";
-
 	/// <summary>
 	/// Token 已被撤销（静默跳转登录页）
 	/// 对应前端: VITE_SERVICE_LOGOUT_CODES

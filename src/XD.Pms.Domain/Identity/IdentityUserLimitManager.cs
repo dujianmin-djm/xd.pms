@@ -35,7 +35,7 @@ public class IdentityUserLimitManager : DomainService
 		var maxUserCountValue = await _featureChecker.GetOrNullAsync(PmsFeatures.MaxUserCount);
 		if (!int.TryParse(maxUserCountValue, out int maxUserCount))
 		{
-			maxUserCount = 40;
+			maxUserCount = 120;
 		}
 		var enabledUserCount = await _userRepository.GetCountAsync(notActive: false);
 		if (enabledUserCount > maxUserCount)
@@ -50,7 +50,7 @@ public class IdentityUserLimitManager : DomainService
 		var maxUserCountValue = await _featureChecker.GetOrNullAsync(PmsFeatures.MaxUserCount);
 		if (!int.TryParse(maxUserCountValue, out int maxUserCount))
 		{
-			maxUserCount = 21;
+			maxUserCount = 120;
 		}
 		var enabledUserCount = await _userRepository.GetCountAsync(notActive: false);
 		if (enabledUserCount >= maxUserCount)

@@ -12,8 +12,9 @@ using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using XD.Pms.Authentication;
+using XD.Pms.ApiKeys;
 using XD.Pms.Books;
+using XD.Pms.EntityFrameworkCore.EntityTypeConfigurations;
 
 namespace XD.Pms.EntityFrameworkCore;
 
@@ -24,7 +25,7 @@ public class PmsDbContext : AbpDbContext<PmsDbContext>, IIdentityDbContext
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
     public DbSet<Book> Books { get; set; }
-	public DbSet<RefreshToken> RefreshTokens { get; set; }
+	public DbSet<ApiKey> ApiKeys { get; set; }
 
 	#region Entities from the modules
 
@@ -78,27 +79,6 @@ public class PmsDbContext : AbpDbContext<PmsDbContext>, IIdentityDbContext
             b.Property(x => x.Name).IsRequired().HasMaxLength(128);
         });
 
-		/* Configure your own tables/entities inside here */
-
-		builder.Entity<RefreshToken>(b =>
-		{
-			b.ToTable(PmsConsts.DbTablePrefix + "RefreshTokens", PmsConsts.DbSchema);
-
-			//b.Ignore(x => x.Clock);
-
-			b.ConfigureByConvention();
-
-			b.HasKey(x => x.Id);
-			b.Property(x => x.Token).IsRequired().HasMaxLength(256);
-			b.Property(x => x.DeviceId).HasMaxLength(128);
-			b.Property(x => x.UserAgent).HasMaxLength(512);
-			b.Property(x => x.ClientIp).HasMaxLength(64);
-
-			// Ë÷Òý
-			b.HasIndex(x => x.Token).IsUnique();
-			b.HasIndex(x => x.UserId);
-			b.HasIndex(x => new { x.UserId, x.IsRevoked });
-			b.HasIndex(x => x.ExpiresAt);
-		});
+		builder.ApplyConfiguration(new ApiKeyConfiguration());
 	}
 }

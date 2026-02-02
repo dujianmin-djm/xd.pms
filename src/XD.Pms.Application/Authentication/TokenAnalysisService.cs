@@ -98,7 +98,7 @@ public class TokenAnalysisService : ITokenAnalysisService, ITransientDependency
 			}
 		}
 
-		// 5. 分析 WWW-Authenticate header（如果有）
+		// 5. 分析 WWW-Authenticate header
 		if (!string.IsNullOrEmpty(wwwAuthenticate))
 		{
 			var headerAnalysis = AnalyzeWwwAuthenticate(wwwAuthenticate);
@@ -137,19 +137,15 @@ public class TokenAnalysisService : ITokenAnalysisService, ITransientDependency
 		// 根据 OpenIddict 的错误信息判断
 		return (error.ToLowerInvariant(), description?.ToLowerInvariant()) switch
 		{
-			// Token 过期相关
 			("invalid_token", var desc) when desc?.Contains("expired") == true
 				=> CreateResult(ApiResponseCode.AccessTokenExpired, "Auth:AccessTokenExpired", TokenStatus.Expired, description),
 
-			// Token 不再有效（通用情况，需要结合其他信息判断）
 			("invalid_token", "the specified token is no longer valid.")
-				=> null, // 返回 null 让其他逻辑继续判断
+				=> null,
 
-			// Token 被撤销
 			("invalid_token", var desc) when desc?.Contains("revoked") == true
 				=> CreateResult(ApiResponseCode.AccessTokenRevoked, "Auth:AccessTokenRevoked", TokenStatus.Revoked, description),
 
-			// 其他 invalid_token 错误
 			("invalid_token", _)
 				=> CreateResult(ApiResponseCode.AccessTokenInvalid, "Auth:AccessTokenInvalid", TokenStatus.Invalid, description),
 

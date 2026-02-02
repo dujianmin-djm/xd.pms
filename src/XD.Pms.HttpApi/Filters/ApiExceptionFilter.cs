@@ -18,7 +18,6 @@ using Volo.Abp.ExceptionHandling;
 using Volo.Abp.Http;
 using Volo.Abp.Validation;
 using XD.Pms.ApiResponse;
-using XD.Pms.Authentication;
 using XD.Pms.Localization;
 
 namespace XD.Pms.Filters;
@@ -81,15 +80,15 @@ public class ApiExceptionFilter : AbpExceptionFilter
 	{
 		return exception switch
 		{
-			// 自定义认证异常
-			AuthenticationException authEx
-				=> (authEx.ErrorCode, authEx.Message),
+			// 业务异常
+			BusinessException businessEx
+				=> (businessEx.Code ?? ApiResponseCode.BadRequest, businessEx.Message),
 
-			// ABP 授权异常
+			// 授权异常
 			AbpAuthorizationException
 				=> (ApiResponseCode.Forbidden, localizer["Auth:Forbidden"].Value),
 
-			// ABP 验证异常
+			// 验证异常
 			AbpValidationException validationEx
 				=> (ApiResponseCode.ValidationError, FormatValidationErrors(validationEx)),
 
@@ -97,17 +96,9 @@ public class ApiExceptionFilter : AbpExceptionFilter
 			EntityNotFoundException
 				=> (ApiResponseCode.NotFound, localizer["Auth:NotFound"].Value),
 
-			// 用户友好异常
-			UserFriendlyException userEx
-				=> (ApiResponseCode.BadRequest, userEx.Message),
-
-			// 业务异常
-			BusinessException businessEx
-				=> (GetBusinessExceptionCode(businessEx), businessEx.Message),
-
 			// 参数异常
 			ArgumentException argEx
-				=> (ApiResponseCode.ValidationError, argEx.Message),
+				=> (ApiResponseCode.BadRequest, argEx.Message),
 
 			// 操作取消
 			OperationCanceledException ocEx
@@ -115,23 +106,6 @@ public class ApiExceptionFilter : AbpExceptionFilter
 
 			// 未知异常
 			_ => (ApiResponseCode.InternalError, localizer["Auth:ServerError"].Value)
-		};
-	}
-
-	/// <summary>
-	/// 获取业务异常的错误码
-	/// </summary>
-	private static string GetBusinessExceptionCode(BusinessException exception)
-	{
-		// 根据 ABP 异常代码映射
-		return exception.Code switch
-		{
-			"Volo.Abp.Identity:DuplicateUserName" => ApiResponseCode.UsernameExists,
-			"Volo.Abp.Identity:DuplicateEmail" => ApiResponseCode.EmailExists,
-			"Volo.Abp.Identity:InvalidPassword" => ApiResponseCode.ValidationError,
-			"Volo.Abp.Identity:PasswordMismatch" => ApiResponseCode.InvalidCredentials,
-			"Volo.Abp.Identity:UserLockedOut" => ApiResponseCode.AccountLocked,
-			_ => ApiResponseCode.BadRequest
 		};
 	}
 

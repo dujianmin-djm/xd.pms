@@ -5,7 +5,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Identity;
 
-namespace XD.Pms.Web.HealthChecks;
+namespace XD.Pms.HealthChecks;
 
 public class PmsDatabaseCheck : IHealthCheck, ITransientDependency
 {

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Identity;
 using Volo.Abp.Json;
 using XD.Pms.ApiResponse;
@@ -17,9 +18,7 @@ using XD.Pms.Authentication.Dto;
 
 namespace XD.Pms.Authentication;
 
-/// <summary>
-/// Token 认证服务（封装 OpenIddict）
-/// </summary>
+[RemoteService(IsEnabled = false)]
 public class TokenAppService : PmsAppService, ITokenAppService
 {
 	private readonly IHttpClientFactory _httpClientFactory;
@@ -138,11 +137,11 @@ public class TokenAppService : PmsAppService, ITokenAppService
 	{
 		if (CurrentUser.Id == null)
 		{
-			throw new AuthenticationException(ApiResponseCode.Unauthorized, L["Auth:Unauthorized"].Value);
+			throw new BusinessException(ApiResponseCode.Unauthorized, L["Auth:Unauthorized"].Value);
 		}
 
 		var user = await _userManager.FindByIdAsync(CurrentUser.Id.Value.ToString())
-			?? throw new AuthenticationException(ApiResponseCode.BadRequest, L["Auth:AccountNotFound"].Value);
+			?? throw new BusinessException(ApiResponseCode.BadRequest, L["Auth:AccountNotFound"].Value);
 
 		var roles = await _userManager.GetRolesAsync(user);
 
@@ -171,14 +170,14 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			var error = _jsonSerializer.Deserialize<OpenIddictErrorResponse>(responseContent);
 			var (code, message) = GetFriendlyTokenError(error?.Error, error?.ErrorDescription, operation);
 			string details = "Request Content:" + _jsonSerializer.Serialize(data, indented: true) + "\r\nResponse:" + responseContent;
-			throw new AuthenticationException(code, message, details);
+			throw new BusinessException(code, message, details);
 		}
 
 		var tokenResponse = _jsonSerializer.Deserialize<OpenIddictTokenResponse>(responseContent);
 
 		if (string.IsNullOrEmpty(tokenResponse?.AccessToken))
 		{
-			throw new AuthenticationException(ApiResponseCode.InternalError, L["Auth:GetTokenFailed"].Value);
+			throw new BusinessException(ApiResponseCode.InternalError, L["Auth:GetTokenFailed"].Value);
 		}
 
 		return new LoginResponseDto
@@ -209,7 +208,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 
 	private string GetDefaultClientId()
 	{
-		return _configuration["OpenIddict:Applications:Pms_App:ClientId"] ?? "Pms_App";
+		return _configuration["AuthServer:Applications:Spa:ClientId"] ?? "Pms_Spa";
 	}
 
 	private string? GetCurrentAccessToken()
@@ -246,7 +245,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 				=> (ApiResponseCode.RefreshTokenRedeemed, L["Auth:RefreshTokenRedeemed"].Value),
 
 			("invalid_grant", "refresh", _)
-				=> (ApiResponseCode.SessionExpired, L["Auth:RefreshTokenInvalid"].Value),
+				=> (ApiResponseCode.RefreshTokenInvalid, L["Auth:RefreshTokenInvalid"].Value),
 
 			// ==================== 其他错误 ====================
 			("invalid_client", _, _)
@@ -269,9 +268,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 				return (null, null);
 			}
 			var jwtToken = handler.ReadJwtToken(token);
-			var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
-			var exp = jwtToken.ValidTo;
-			return (jti, exp);
+			return (jwtToken.Id, jwtToken.ValidTo);
 		}
 		catch
 		{

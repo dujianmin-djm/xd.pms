@@ -14,7 +14,7 @@ using XD.Pms.ApiResponse;
 using XD.Pms.Authentication;
 using XD.Pms.Localization;
 
-namespace XD.Pms.Web.Middlewares;
+namespace XD.Pms.Middlewares;
 
 /// <summary>
 /// API 异常处理中间件
@@ -98,40 +98,26 @@ public class ApiResponseHandlerMiddleware
 	private async Task<TokenAnalysisResult> AnalyzeAuthenticationErrorAsync(HttpContext context)
 	{
 		// 获取请求中的 Token
-		var token = ExtractBearerToken(context);
-
-		// 获取 WWW-Authenticate header
-		var wwwAuthenticate = context.Response.Headers.WWWAuthenticate.ToString();
-
-		// 使用 TokenAnalysisService 进行分析
-		var analysisService = context.RequestServices.GetService<ITokenAnalysisService>();
-
-		if (analysisService != null)
+		var authHeader = context.Request.Headers.Authorization.ToString();
+		if (!authHeader.IsNullOrEmpty() && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
 		{
-			return await analysisService.AnalyzeTokenErrorAsync(token, wwwAuthenticate);
+			var token = authHeader.Substring("Bearer ".Length).Trim();
+			var wwwAuthenticate = context.Response.Headers.WWWAuthenticate.ToString();
+
+			// 使用 TokenAnalysisService 进行分析
+			var analysisService = context.RequestServices.GetService<ITokenAnalysisService>();
+			if (analysisService != null)
+			{
+				return await analysisService.AnalyzeTokenErrorAsync(token, wwwAuthenticate);
+			}
 		}
 
-		// 降级处理：简单解析
 		return new TokenAnalysisResult
 		{
 			Code = ApiResponseCode.Unauthorized,
-			Message = _localizer["Auth:Unauthorized"].Value,
-			Status = TokenStatus.Unknown
+			Message = _localizer["Auth:AccessTokenMissing"].Value,
+			Status = TokenStatus.Missing
 		};
-	}
-
-	private static string? ExtractBearerToken(HttpContext context)
-	{
-		var authHeader = context.Request.Headers.Authorization.ToString();
-		if (string.IsNullOrEmpty(authHeader))
-		{
-			return null;
-		}
-		if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-		{
-			return authHeader.Substring("Bearer ".Length).Trim();
-		}
-		return null;
 	}
 
 	private (string Code, string Message) GetStatusCodeResponse(int statusCode)
@@ -152,23 +138,17 @@ public class ApiResponseHandlerMiddleware
 
 		var (code, message) = exception switch
 		{
-			// 自定义认证异常
-			AuthenticationException authEx => (authEx.ErrorCode, authEx.Message),
+			// 业务异常
+			BusinessException bizEx => (bizEx.Code ?? ApiResponseCode.BadRequest, bizEx.Message),
 
-			// ABP 授权异常
+			// 授权异常
 			AbpAuthorizationException => (ApiResponseCode.Forbidden, _localizer["Auth:Forbidden"].Value),
 
-			// ABP 验证异常
+			// 验证异常
 			AbpValidationException validationEx => (ApiResponseCode.ValidationError, FormatValidationErrors(validationEx)),
 
 			// 实体不存在
 			EntityNotFoundException => (ApiResponseCode.NotFound, _localizer["Auth:NotFound"].Value),
-
-			// ABP 业务异常
-			UserFriendlyException userEx => (ApiResponseCode.BadRequest, userEx.Message),
-
-			// ABP 业务异常
-			BusinessException bizEx => (ApiResponseCode.BadRequest, bizEx.Message),
 
 			// 操作取消
 			OperationCanceledException ocEx => (ApiResponseCode.BadRequest, ocEx.Message),
@@ -177,7 +157,7 @@ public class ApiResponseHandlerMiddleware
 			InvalidOperationException ioEx => (ApiResponseCode.BadRequest, ioEx.Message),
 
 			// 参数异常
-			ArgumentException argEx => (ApiResponseCode.ValidationError, argEx.Message),
+			ArgumentException argEx => (ApiResponseCode.BadRequest, argEx.Message),
 
 			// 未处理的异常
 			_ => (ApiResponseCode.InternalError, _localizer["Auth:ServerError"].Value)

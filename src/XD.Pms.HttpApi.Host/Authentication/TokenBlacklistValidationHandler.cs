@@ -6,10 +6,9 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
-using XD.Pms.Authentication;
 using XD.Pms.Localization;
 
-namespace XD.Pms.Web.Authentication;
+namespace XD.Pms.Authentication;
 
 /// <summary>
 /// Token 验证事件处理器

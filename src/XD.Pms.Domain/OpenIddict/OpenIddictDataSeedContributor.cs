@@ -74,45 +74,65 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
             OpenIddictConstants.Permissions.Scopes.Phone,
             OpenIddictConstants.Permissions.Scopes.Profile,
             OpenIddictConstants.Permissions.Scopes.Roles,
-            "Pms"
+			"Pms"
         };
 
         var configurationSection = _configuration.GetSection("OpenIddict:Applications");
 
-
-		// ============================================
-		// 1. SPA / Soybean Admin 前端应用
-		// ============================================
-		var webClientId = configurationSection["Pms_App:ClientId"];
-		if (!webClientId.IsNullOrWhiteSpace())
+		// SPA Client
+		var spaClientId = configurationSection["Spa:ClientId"];
+		if (!spaClientId.IsNullOrWhiteSpace())
 		{
-			var vueClientRootUrl = configurationSection["Pms_App:RootUrl"]?.TrimEnd('/') ?? string.Empty;
+			var vueClientRootUrl = configurationSection["Spa:RootUrl"]?.TrimEnd('/') ?? string.Empty;
 
 			await CreateApplicationAsync(
 				applicationType: OpenIddictConstants.ApplicationTypes.Web,
-				name: webClientId!,
+				name: spaClientId!,
 				type: OpenIddictConstants.ClientTypes.Public,
 				consentType: OpenIddictConstants.ConsentTypes.Implicit,
-				displayName: "SPA 前端应用",
+				displayName: "SPA Front-end Application",
 				secret: null,
 				grantTypes:
 				[
-					OpenIddictConstants.GrantTypes.Password,           // 密码模式（主要）
-                    OpenIddictConstants.GrantTypes.RefreshToken,       // 刷新令牌
-                    OpenIddictConstants.GrantTypes.AuthorizationCode,  // 授权码模式（备用）
+					OpenIddictConstants.GrantTypes.Password,
+                    OpenIddictConstants.GrantTypes.RefreshToken,
+                    OpenIddictConstants.GrantTypes.AuthorizationCode,
 				],
-				scopes: commonScopes,
-				redirectUris: [$"{vueClientRootUrl}/auth/callback"],
+				scopes: [..commonScopes, OpenIddictConstants.Scopes.OfflineAccess],
+				redirectUris: [$"{vueClientRootUrl}/callback"],
 				postLogoutRedirectUris: [vueClientRootUrl],
 				clientUri: vueClientRootUrl,
 				logoUri: "/images/clients/vue.svg"
 			);
 		}
 
-		// ============================================
-		// 2. 移动端应用（UniApp / Android）
-		// ============================================
-		var mobileClientId = configurationSection["Pms_Mobile:ClientId"];
+		//Web Client
+		var webClientId = configurationSection["Web:ClientId"];
+		if (!webClientId.IsNullOrWhiteSpace())
+		{
+			var webClientRootUrl = configurationSection["Web:RootUrl"]!.EnsureEndsWith('/');
+			await CreateApplicationAsync(
+				applicationType: OpenIddictConstants.ApplicationTypes.Web,
+				name: webClientId!,
+				type: OpenIddictConstants.ClientTypes.Confidential,
+				consentType: OpenIddictConstants.ConsentTypes.Implicit,
+				displayName: "Web Application",
+				secret: configurationSection["Web:ClientSecret"] ?? "1q2w3e*",
+				grantTypes:
+                [
+					OpenIddictConstants.GrantTypes.AuthorizationCode, 
+                    OpenIddictConstants.GrantTypes.Implicit
+				],
+				scopes: commonScopes,
+				redirectUris: [$"{webClientRootUrl}signin-oidc"],
+				clientUri: webClientRootUrl,
+				postLogoutRedirectUris: [$"{webClientRootUrl}signout-callback-oidc"],
+				logoUri: "/images/clients/angular.svg"
+			);
+		}
+
+		// mobile Client
+		var mobileClientId = configurationSection["Mobile:ClientId"];
 		if (!mobileClientId.IsNullOrWhiteSpace())
 		{
 			await CreateApplicationAsync(
@@ -120,14 +140,14 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
 				name: mobileClientId!,
 				type: OpenIddictConstants.ClientTypes.Public,
 				consentType: OpenIddictConstants.ConsentTypes.Implicit,
-				displayName: "移动端应用 (UniApp/Android)",
+				displayName: "Mobile Application (UniApp/Android)",
 				secret: null,
 				grantTypes:
 				[
 					OpenIddictConstants.GrantTypes.Password,
 					OpenIddictConstants.GrantTypes.RefreshToken,
 				],
-				scopes: commonScopes,
+				scopes: [.. commonScopes, OpenIddictConstants.Scopes.OfflineAccess],
 				redirectUris: null,
 				postLogoutRedirectUris: null,
 				clientUri: null,
@@ -135,25 +155,23 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
 			);
 		}
 
-		// ============================================
-		// 3. Swagger 测试客户端
-		// ============================================
-		var swaggerClientId = configurationSection["Pms_Swagger:ClientId"];
+		// swagger Client
+		var swaggerClientId = configurationSection["Swagger:ClientId"];
 		if (!swaggerClientId.IsNullOrWhiteSpace())
 		{
-			var swaggerRootUrl = configurationSection["Pms_Swagger:RootUrl"]?.TrimEnd('/');
+			var swaggerRootUrl = configurationSection["Swagger:RootUrl"]?.TrimEnd('/');
 
 			await CreateApplicationAsync(
 				applicationType: OpenIddictConstants.ApplicationTypes.Web,
 				name: swaggerClientId!,
 				type: OpenIddictConstants.ClientTypes.Public,
 				consentType: OpenIddictConstants.ConsentTypes.Implicit,
-				displayName: "Swagger 测试应用",
+				displayName: "Swagger UI",
 				secret: null,
 				grantTypes:
 				[
 					OpenIddictConstants.GrantTypes.AuthorizationCode,
-					OpenIddictConstants.GrantTypes.Password,  // 也支持密码模式方便测试
+					OpenIddictConstants.GrantTypes.Password,
                 ],
 				scopes: commonScopes,
 				redirectUris: [$"{swaggerRootUrl}/swagger/oauth2-redirect.html"],
@@ -162,20 +180,18 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
 			);
 		}
 
-		// ============================================
-		// 4. 服务间调用（Client Credentials）- 可选
-		// ============================================
-		var serviceClientId = configurationSection["Pms_Service:ClientId"];
+		// Internal Service Client
+		var serviceClientId = configurationSection["Service:ClientId"];
 		if (!serviceClientId.IsNullOrWhiteSpace())
 		{
-			var serviceSecret = configurationSection["Pms_Service:ClientSecret"];
+			var serviceSecret = configurationSection["Service:ClientSecret"];
 
 			await CreateApplicationAsync(
 				applicationType: OpenIddictConstants.ApplicationTypes.Web,
 				name: serviceClientId!,
 				type: OpenIddictConstants.ClientTypes.Confidential,
 				consentType: OpenIddictConstants.ConsentTypes.Implicit,
-				displayName: "内部服务调用",
+				displayName: "Internal Service",
 				secret: serviceSecret,
 				grantTypes: [OpenIddictConstants.GrantTypes.ClientCredentials],
 				scopes: ["Pms"],    //通常只需要API作用域
@@ -185,13 +201,12 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
 				logoUri: null
 			);
 		}
-		
 
 
 
 
 		//Console Test / Angular Client
-		var consoleAndAngularClientId = configurationSection["Pms_App:ClientId222"];
+		var consoleAndAngularClientId = configurationSection["Pms_App:ClientId"];
         if (!consoleAndAngularClientId.IsNullOrWhiteSpace())
         {
             var consoleAndAngularClientRootUrl = configurationSection["Pms_App:RootUrl"]?.TrimEnd('/') ?? string.Empty;
@@ -233,7 +248,8 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
         List<string>? postLogoutRedirectUris = null,
         List<string>? permissions = null,
         string? clientUri = null,
-        string? logoUri = null)
+        string? logoUri = null,
+		bool requirePkce = false)
     {
         if (!string.IsNullOrEmpty(secret) && string.Equals(type, OpenIddictConstants.ClientTypes.Public,
                 StringComparison.OrdinalIgnoreCase))
@@ -371,7 +387,13 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
             }
         }
 
-        if (!redirectUris.IsNullOrEmpty())
+		// PKCE 要求
+		if (requirePkce)
+		{
+			application.Requirements.Add(OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange);
+		}
+
+		if (!redirectUris.IsNullOrEmpty())
         {
             foreach (var redirectUri in redirectUris!.Where(redirectUri => !redirectUri.IsNullOrWhiteSpace()))
             {

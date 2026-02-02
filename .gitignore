@@ -272,3 +272,5 @@ src/XD.Pms.Blazor.Server.Tiered/Logs/*
 # IdentityServer temp files
 tempkey.rsa
 tempkey.jwk
+
+src/XD.Pms.HttpApi.Host/distributed-locks/*

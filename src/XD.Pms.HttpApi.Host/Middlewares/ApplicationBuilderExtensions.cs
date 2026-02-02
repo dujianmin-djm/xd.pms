@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using System;
 
-namespace XD.Pms.Web.Middlewares;
+namespace XD.Pms.Middlewares;
 
 public static class ApplicationBuilderExtensions
 {
@@ -13,9 +13,11 @@ public static class ApplicationBuilderExtensions
 		return builder.UseMiddleware<ApiResponseHandlerMiddleware>();
 	}
 
-	// Api语言设置中间件
-	public static IApplicationBuilder UseApiLanguageSetting(this IApplicationBuilder builder)
+	/// <summary>
+	/// Api Token请求头转换中间件
+	/// </summary>
+	public static IApplicationBuilder UseTokenHeaderTransform(this IApplicationBuilder builder)
 	{
-		return builder.UseMiddleware<ApiLanguageSettingMiddleware>();
+		return builder.UseMiddleware<TokenHeaderTransformMiddleware>();
 	}
 }

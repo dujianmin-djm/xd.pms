@@ -10,7 +10,6 @@ using XD.Pms.Web;
 using XD.Pms.Web.Menus;
 using Volo.Abp.AspNetCore.TestBase;
 using Volo.Abp.Modularity;
-using Volo.Abp.OpenIddict;
 using Volo.Abp.UI.Navigation;
 
 namespace XD.Pms;
@@ -33,12 +32,6 @@ public class PmsWebTestModule : AbpModule
         context.Services.PreConfigure<IMvcBuilder>(builder =>
         {
             builder.PartManager.ApplicationParts.Add(new CompiledRazorAssemblyPart(typeof(PmsWebModule).Assembly));
-        });
-
-        context.Services.GetPreConfigureActions<OpenIddictServerBuilder>().Clear();
-        PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
-        {
-            options.AddDevelopmentEncryptionAndSigningCertificate = true;
         });
     }
 

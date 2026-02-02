@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>XD.Pms</RootNamespace>
+    <PreserveCompilationReferences>true</PreserveCompilationReferences>
+    <UserSecretsId>XD.Pms-4681b4fd-151f-4221-84a4-929d86723e4c</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
+    <PackageReference Include="DistributedLock.FileSystem" Version="1.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.2" />
+    <PackageReference Include="DistributedLock.Redis" Version="1.1.1" />
+    <PackageReference Include="Volo.Abp.AspNetCore.Serilog" Version="10.0.2" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="10.0.2" />
+    <PackageReference Include="Volo.Abp.Caching.StackExchangeRedis" Version="10.0.2" />
+    <PackageReference Include="Volo.Abp.DistributedLocking" Version="10.0.2" />
+    <PackageReference Include="Volo.Abp.Identity.AspNetCore" Version="10.0.2" />
+    <PackageReference Include="Volo.Abp.OpenIddict.AspNetCore" Version="10.0.2" />
+    <PackageReference Include="Volo.Abp.Swashbuckle" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="distributed-locks\**" />
+    <Compile Remove="Logs\**" />
+    <Content Remove="distributed-locks\**" />
+    <Content Remove="Logs\**" />
+    <EmbeddedResource Remove="distributed-locks\**" />
+    <EmbeddedResource Remove="Logs\**" />
+    <None Remove="distributed-locks\**" />
+    <None Remove="Logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="openiddict.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\XD.Pms.Application\XD.Pms.Application.csproj" />
+    <ProjectReference Include="..\XD.Pms.EntityFrameworkCore\XD.Pms.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\XD.Pms.HttpApi\XD.Pms.HttpApi.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -20,7 +20,7 @@ public class TokenAnalysisResult
 	public TokenStatus Status { get; set; }
 
 	/// <summary>
-	/// 详细信息（用于日志）
+	/// 详细信息
 	/// </summary>
 	public string? Details { get; set; }
 }
