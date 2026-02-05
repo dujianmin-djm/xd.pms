@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
-using Volo.Abp.Application.Services;
 using XD.Pms.ApiKeys.Dto;
 
 namespace XD.Pms.ApiKeys;
 
-public interface IApiKeyAppService : IApplicationService
+public interface IApiKeyAppService
 {
 	/// <summary>
 	/// 获取列表

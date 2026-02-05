@@ -16,12 +16,7 @@ public class ApiKeyValidationResult
 	/// <summary>
 	/// 失败消息
 	/// </summary>
-	public string? FailureMessage { get; set; }
-
-	/// <summary>
-	/// 错误码
-	/// </summary>
-	public string? ErrorCode { get; set; }
+	public string? ErrorMessage { get; set; }
 
 	/// <summary>
 	/// API Key ID
@@ -73,13 +68,12 @@ public class ApiKeyValidationResult
 		};
 	}
 
-	public static ApiKeyValidationResult Fail(string errorCode, string message)
+	public static ApiKeyValidationResult Fail(string message)
 	{
 		return new ApiKeyValidationResult
 		{
 			IsValid = false,
-			ErrorCode = errorCode,
-			FailureMessage = message
+			ErrorMessage = message
 		};
 	}
 }

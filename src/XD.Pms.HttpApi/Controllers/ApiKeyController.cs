@@ -12,7 +12,7 @@ namespace XD.Pms.Controllers;
 [Area("app")]
 [Route("papi/api-keys")]
 [Authorize(PmsPermissions.ApiKeys.Default)]
-public class ApiKeyController : PmsControllerBase, IApiKeyAppService
+public class ApiKeyController : PmsControllerBase
 {
 	private readonly IApiKeyAppService _apiKeyAppService;
 

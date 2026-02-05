@@ -11,7 +11,7 @@ namespace XD.Pms.Authentication;
 public class TokenBlacklistService : ITokenBlacklistService, ITransientDependency
 {
 	private readonly IDistributedCache _cache;
-	private const string BlacklistPrefix = "token:blacklist:";
+	private const string BlacklistPrefix = "pms:token:blacklist:";
 
 	public TokenBlacklistService(IDistributedCache cache)
 	{

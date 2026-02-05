@@ -9,7 +9,7 @@ public class ApiKeyConfiguration : IEntityTypeConfiguration<ApiKey>
 {
 	public void Configure(EntityTypeBuilder<ApiKey> builder)
 	{
-		builder.ToTable(PmsConsts.DbTablePrefix + "ApiKeys", PmsConsts.DbSchema);
+		builder.ToTable(PmsConsts.DbTablePrefix.System + "ApiKeys", PmsConsts.DbSchema);
 
 		builder.ConfigureByConvention();
 

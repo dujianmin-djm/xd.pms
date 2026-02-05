@@ -42,7 +42,7 @@ public abstract class BookAppService_Tests<TStartupModule> : PmsApplicationTestB
                 Name = "New test book 42",
                 Price = 10,
                 PublishDate = DateTime.Now,
-                Type = BookType.ScienceFiction
+                Type = 1
             }
         );
 
@@ -62,7 +62,7 @@ public abstract class BookAppService_Tests<TStartupModule> : PmsApplicationTestB
                     Name = "",
                     Price = 10,
                     PublishDate = DateTime.Now,
-                    Type = BookType.ScienceFiction
+                    Type = 2
                 }
             );
         });

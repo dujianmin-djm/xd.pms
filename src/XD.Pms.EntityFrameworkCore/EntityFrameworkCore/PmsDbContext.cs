@@ -9,6 +9,7 @@ using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.OpenIddict;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
@@ -59,11 +60,13 @@ public class PmsDbContext : AbpDbContext<PmsDbContext>, IIdentityDbContext
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(builder);
+		base.OnModelCreating(builder);
+		AbpCommonDbProperties.DbTablePrefix = PmsConsts.DbTablePrefix.System;
+		AbpOpenIddictDbProperties.DbTablePrefix = PmsConsts.DbTablePrefix.Oidc;
 
-        /* Include modules to your migration db context */
+		/* Include modules to your migration db context */
 
-        builder.ConfigurePermissionManagement();
+		builder.ConfigurePermissionManagement();
         builder.ConfigureSettingManagement();
         builder.ConfigureBackgroundJobs();
         builder.ConfigureAuditLogging();
@@ -74,8 +77,8 @@ public class PmsDbContext : AbpDbContext<PmsDbContext>, IIdentityDbContext
         
         builder.Entity<Book>(b =>
         {
-            b.ToTable(PmsConsts.DbTablePrefix + "Books", PmsConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
+            b.ToTable(PmsConsts.DbTablePrefix.BaseData + "Books", PmsConsts.DbSchema);
+            b.ConfigureByConvention();
             b.Property(x => x.Name).IsRequired().HasMaxLength(128);
         });
 

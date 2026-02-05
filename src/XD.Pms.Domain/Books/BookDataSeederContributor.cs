@@ -28,7 +28,7 @@ public class BookDataSeederContributor : IDataSeedContributor, ITransientDepende
                 new Book
                 {
                     Name = "1984",
-                    Type = BookType.Dystopia,
+                    Type = 1,
                     PublishDate = new DateTime(1949, 6, 8),
                     Price = 19.84f
                 },
@@ -39,7 +39,7 @@ public class BookDataSeederContributor : IDataSeedContributor, ITransientDepende
                 new Book
                 {
                     Name = "The Hitchhiker's Guide to the Galaxy",
-                    Type = BookType.ScienceFiction,
+                    Type = 4,
                     PublishDate = new DateTime(1995, 9, 27),
                     Price = 42.0f
                 },

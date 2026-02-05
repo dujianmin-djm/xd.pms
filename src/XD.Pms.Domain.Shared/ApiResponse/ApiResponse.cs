@@ -55,3 +55,5 @@ public class ApiResponse<T> : IApiResponse
 		return new ApiResponse<object>(code, false, default, message);
 	}
 }
+
+public interface IApiResponse;

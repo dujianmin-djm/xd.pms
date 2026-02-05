@@ -54,12 +54,8 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
 
 		if (!result.IsValid)
 		{
-			Logger.LogWarning(
-				"API Key 验证失败: {ErrorCode} - {Message}",
-				result.ErrorCode,
-				result.FailureMessage);
-
-			return AuthenticateResult.Fail(result.FailureMessage ?? "Invalid API Key");
+			Logger.LogWarning("API Key 验证失败: {Message}", result.ErrorMessage);
+			return AuthenticateResult.Fail(result.ErrorMessage ?? "Invalid API Key");
 		}
 
 		// 创建 Claims
@@ -103,7 +99,10 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
 		var principal = new ClaimsPrincipal(identity);
 		var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
-		Logger.LogDebug("API Key 验证成功: {ClientId}", result.ClientId);
+		if (Logger.IsEnabled(LogLevel.Debug))
+		{
+			Logger.LogDebug("API Key 验证成功: {ClientId}", result.ClientId);
+		}
 
 		return AuthenticateResult.Success(ticket);
 	}

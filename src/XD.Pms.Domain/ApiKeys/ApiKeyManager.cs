@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Domain.Services;
+using XD.Pms.ApiResponse;
 
 namespace XD.Pms.ApiKeys;
 
@@ -23,7 +24,7 @@ public class ApiKeyManager : DomainService
 	/// <summary>
 	/// 创建 API Key
 	/// </summary>
-	/// <returns>返回明文 Key（仅此一次）和实体</returns>
+	/// <returns>返回明文 Key 和实体</returns>
 	public async Task<(string PlainKey, ApiKey Entity)> CreateAsync(
 		string clientId,
 		string clientName,
@@ -36,16 +37,13 @@ public class ApiKeyManager : DomainService
 		Guid? userId = null,
 		string keyPrefix = "pk")
 	{
-		// 检查客户端 ID 是否已存在
 		if (await _apiKeyRepository.ClientIdExistsAsync(clientId))
 		{
-			throw new BusinessException(ApiKeyErrorCodes.DuplicateClientId)
-				.WithData("clientId", clientId);
+			throw new BusinessException(ApiResponseCode.ValidationError, $"客户端 ID 【{clientId}】 已存在");
 		}
 
-		// 生成 API Key
 		var plainKey = GenerateApiKey(keyPrefix);
-		var keyHash = ComputeHash(plainKey);
+		var keyHash = HashData(plainKey);
 		var displayPrefix = plainKey[..Math.Min(12, plainKey.Length)] + "...";
 
 		var apiKey = new ApiKey(
@@ -105,7 +103,7 @@ public class ApiKeyManager : DomainService
 		var apiKey = await _apiKeyRepository.GetAsync(id);
 
 		var plainKey = GenerateApiKey(keyPrefix);
-		var keyHash = ComputeHash(plainKey);
+		var keyHash = HashData(plainKey);
 		var displayPrefix = plainKey[..Math.Min(12, plainKey.Length)] + "...";
 
 		apiKey.SetKeyHash(keyHash);
@@ -141,18 +139,17 @@ public class ApiKeyManager : DomainService
 	/// </summary>
 	public async Task<ApiKey?> FindByPlainKeyAsync(string plainKey)
 	{
-		var keyHash = ComputeHash(plainKey);
+		var keyHash = HashData(plainKey);
 		return await _apiKeyRepository.FindByKeyHashAsync(keyHash);
 	}
 
 	/// <summary>
 	/// 计算 Key 的哈希值
 	/// </summary>
-	public static string ComputeHash(string plainKey)
+	public static string HashData(string plainKey)
 	{
-		using var sha256 = SHA256.Create();
 		var bytes = Encoding.UTF8.GetBytes(plainKey);
-		var hash = sha256.ComputeHash(bytes);
+		var hash = SHA256.HashData(bytes);
 		return Convert.ToBase64String(hash);
 	}
 
@@ -164,12 +161,7 @@ public class ApiKeyManager : DomainService
 		var bytes = new byte[32];
 		using var rng = RandomNumberGenerator.Create();
 		rng.GetBytes(bytes);
-
-		var base64 = Convert.ToBase64String(bytes)
-			.Replace("+", "")
-			.Replace("/", "")
-			.Replace("=", "");
-
+		var base64 = Convert.ToBase64String(bytes).Replace("+", "").Replace("/", "").Replace("=", "");
 		return $"{prefix}_{base64}";
 	}
 }

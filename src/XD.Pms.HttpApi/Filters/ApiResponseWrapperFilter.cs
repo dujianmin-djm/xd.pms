@@ -6,7 +6,7 @@ using XD.Pms.ApiResponse;
 namespace XD.Pms.Filters;
 
 /// <summary>
-/// API 响应包装过滤器
+/// API 响应包装结果过滤器
 /// </summary>
 public class ApiResponseWrapperFilter : IAsyncResultFilter
 {
@@ -26,7 +26,7 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 				return;
 			}
 
-			var wrappedResult = new ApiResponse<object>(objectResult.StatusCode.ToString() ?? "200", true, objectResult.Value);
+			var wrappedResult = new ApiResponse<object>(objectResult.StatusCode?.ToString() ?? "200", true, objectResult.Value);
 			context.Result = new ObjectResult(wrappedResult)
 			{
 				StatusCode = 200
@@ -46,6 +46,6 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 	private static bool IsApiRequest(ResultExecutingContext context)
 	{
 		var path = context.HttpContext.Request.Path.Value?.ToLower() ?? "";
-		return path.StartsWith("/papi/");
+		return path.StartsWith("/papi/") || path.StartsWith("/api/");
 	}
 }

@@ -1,4 +1,5 @@
 using Autofac.Core;
+using Azure.Core;
 using Medallion.Threading;
 using Medallion.Threading.FileSystem;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -108,7 +109,7 @@ public class PmsHttpApiHostModule : AbpModule
 
 		ConfigureCache();
 		ConfigureAutoApiControllers();
-        ConfigureAuthentication(context.Services, configuration);
+        ConfigureAuthentication(context.Services);
         ConfigureVirtualFileSystem(hostingEnvironment);
         ConfigureDataProtection(context.Services, hostingEnvironment);
         ConfigureDistributedLocking(context.Services);
@@ -252,22 +253,47 @@ public class PmsHttpApiHostModule : AbpModule
         });
     }
 
-    private static void ConfigureAuthentication(IServiceCollection services, IConfiguration configuration)
+    private static void ConfigureAuthentication(IServiceCollection services)
 	{
-		//// 配置默认认证方案
-		//services.AddAuthentication(options =>
-		//{
-		//	options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-		//	options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-		//	options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-		//});
+		/*	 认证方案的工作机制
+		 *	1. DefaultAuthenticateScheme  →  用于 [Authorize] 认证
+			2. DefaultChallengeScheme     →  用于 401 Challenge 响应
+			3. DefaultScheme              →  当上面两个为 null 时的回退值
 
-		//services.AddAuthentication().AddApiKey(options =>
-		//{
-		//	options.HeaderName = configuration["AuthServer:ApiKey:HeaderName"] ?? ApiKeyConsts.DefaultHeaderName;
-		//	options.Realm = configuration["AuthServer:ApiKey:Realm"] ?? "Pms API";
-		//	options.Enabled = configuration.GetValue("AuthServer:ApiKey:Enabled", true);
-		//});
+			如果设置了 DefaultAuthenticateScheme = "X"，则
+			- 所有 [Authorize] 请求都会使用 "X" 方案
+			- 不会触发 PolicyScheme 的 ForwardDefaultSelector
+		 */
+		services.AddAuthentication(options =>
+		{
+			options.DefaultScheme = "Pms.Smart";
+			options.DefaultAuthenticateScheme = null;
+			options.DefaultChallengeScheme = null;
+		})
+		.AddApiKey(options =>
+		{
+			options.Enabled = true;
+			options.Realm = "Pms API";
+			options.HeaderName = ApiKeyConsts.DefaultHeaderName;
+		})
+		.AddPolicyScheme("Pms.Smart", "Smart Auth Selector", options =>
+		{
+			options.ForwardDefaultSelector = context =>
+			{
+				if (context.Request.Headers.ContainsKey(ApiKeyConsts.DefaultHeaderName))
+				{
+					return ApiKeyAuthenticationOptions.DefaultScheme;
+				}
+
+				var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
+				if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+				{
+					return OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+				}
+
+				return IdentityConstants.ApplicationScheme;
+			};
+		});
 
 		services.ConfigureApplicationCookie(options =>
 		{
@@ -279,23 +305,10 @@ public class PmsHttpApiHostModule : AbpModule
 			options.ExpireTimeSpan = TimeSpan.FromDays(7);
 			options.SlidingExpiration = true;
 
-			options.ForwardDefaultSelector = ctx =>
-			{
-				string authorization = ctx.Request.Headers.Authorization.ToString();
-				if (!authorization.IsNullOrWhiteSpace() && authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-				{
-					// 认证方案转发到 OpenIddict
-					return OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme ?? "Bearer";
-				}
-				// 默认：Cookie 认证
-				return null;
-			};
-
 			options.Events.OnRedirectToLogin = context =>
 			{
 				if (IsApiRequest(context.Request))
 				{
-					// Cookie 认证，对 API 请求返回 401 而非重定向
 					context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 					return Task.CompletedTask;
 				}
@@ -316,40 +329,19 @@ public class PmsHttpApiHostModule : AbpModule
 		});
 
 		services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
-        {
-            options.IsDynamicClaimsEnabled = true;
-        });
-
-		// 配置授权策略 可以配合Controller [Authorize(AuthenticationSchemes = "ApiKeyOnly")]
-		services.AddAuthorizationBuilder()
-			.AddPolicy("ApiAccess", policy =>
-			{
-				policy.AddAuthenticationSchemes(
-					OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
-					ApiKeyAuthenticationOptions.DefaultScheme);
-				policy.RequireAuthenticatedUser();
-			})
-			.AddPolicy("ApiKeyOnly", policy =>
-			{
-				policy.AddAuthenticationSchemes(ApiKeyAuthenticationOptions.DefaultScheme);
-				policy.RequireAuthenticatedUser();
-			})
-			.AddPolicy("BearerOnly", policy =>
-			{
-				policy.AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
-				policy.RequireAuthenticatedUser();
-			});
+		{
+			options.IsDynamicClaimsEnabled = true;
+		});
 	}
 
 	private static bool IsApiRequest(HttpRequest request)
 	{
-		var path = request.Path.Value?.ToLower() ?? "";
-		return path.StartsWith("/papi/") || path.StartsWith("/api/");
+		return request.Path.StartsWithSegments("/papi") || request.Path.StartsWithSegments("/api");
 	}
 
 	private static void ConfigureSwaggerServices(IServiceCollection services, IConfiguration configuration)
     {
-		var authority = configuration["AuthServer:Authority"]!.TrimEnd('/');// 认证服务地址
+		var authority = configuration["AuthServer:Authority"]!.TrimEnd('/');
 		services.AddAbpSwaggerGen(options =>
 		{
 			options.SwaggerDoc("v1", new OpenApiInfo { Title = "Pms API", Version = "v1", Description = "" });

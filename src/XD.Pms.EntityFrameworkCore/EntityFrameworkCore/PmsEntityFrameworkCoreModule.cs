@@ -1,17 +1,18 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
+using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
+using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.SqlServer;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity.EntityFrameworkCore;
-using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.Modularity;
+using Volo.Abp.OpenIddict;
+using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
-using Volo.Abp.Studio;
 
 namespace XD.Pms.EntityFrameworkCore;
 
@@ -32,7 +33,10 @@ public class PmsEntityFrameworkCoreModule : AbpModule
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
         PmsEfCoreEntityExtensionMappings.Configure();
-    }
+
+		AbpCommonDbProperties.DbTablePrefix = PmsConsts.DbTablePrefix.System;
+		AbpOpenIddictDbProperties.DbTablePrefix = PmsConsts.DbTablePrefix.Oidc;
+	}
 
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
@@ -43,11 +47,6 @@ public class PmsEntityFrameworkCoreModule : AbpModule
             options.AddDefaultRepositories(includeAllEntities: true);
         });
 
-        if (AbpStudioAnalyzeHelper.IsInAnalyzeMode)
-        {
-            return;
-        }
-
         Configure<AbpDbContextOptions>(options =>
         {
             /* The main point to change your DBMS.
@@ -55,7 +54,6 @@ public class PmsEntityFrameworkCoreModule : AbpModule
 
             options.UseSqlServer();
 
-        });
-        
+		});
     }
 }

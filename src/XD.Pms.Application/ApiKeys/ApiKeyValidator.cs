@@ -39,10 +39,10 @@ public class ApiKeyValidator : IApiKeyValidator, ITransientDependency
 	{
 		if (string.IsNullOrWhiteSpace(apiKey))
 		{
-			return ApiKeyValidationResult.Fail(ApiKeyErrorCodes.InvalidApiKey, "API Key 不能为空");
+			return ApiKeyValidationResult.Fail("API Key 不能为空");
 		}
 
-		var keyHash = ApiKeyManager.ComputeHash(apiKey);
+		var keyHash = ApiKeyManager.HashData(apiKey);
 		var cacheKey = $"{ApiKeyConsts.CacheKeyPrefix}{keyHash}";
 
 		// 尝试从缓存获取
@@ -63,7 +63,7 @@ public class ApiKeyValidator : IApiKeyValidator, ITransientDependency
 
 			_logger.LogWarning("无效的 API Key 尝试: {KeyPrefix}", apiKey[..Math.Min(8, apiKey.Length)]);
 
-			return ApiKeyValidationResult.Fail(ApiKeyErrorCodes.InvalidApiKey, "无效的 API Key");
+			return ApiKeyValidationResult.Fail("无效的 API Key");
 		}
 
 		// 验证状态
@@ -86,13 +86,13 @@ public class ApiKeyValidator : IApiKeyValidator, ITransientDependency
 		// 检查是否激活
 		if (!entity.IsActive)
 		{
-			return ApiKeyValidationResult.Fail(ApiKeyErrorCodes.ApiKeyDisabled, "API Key 已被禁用");
+			return ApiKeyValidationResult.Fail("API Key 已被禁用");
 		}
 
 		// 检查是否过期
 		if (entity.IsExpired())
 		{
-			return ApiKeyValidationResult.Fail(ApiKeyErrorCodes.ApiKeyExpired, "API Key 已过期");
+			return ApiKeyValidationResult.Fail("API Key 已过期");
 		}
 
 		// 检查 IP 地址
@@ -103,7 +103,7 @@ public class ApiKeyValidator : IApiKeyValidator, ITransientDependency
 				entity.ClientId,
 				ipAddress);
 
-			return ApiKeyValidationResult.Fail(ApiKeyErrorCodes.IpAddressNotAllowed, "IP 地址不在允许列表中");
+			return ApiKeyValidationResult.Fail("IP 地址不在允许列表中");
 		}
 
 		return ApiKeyValidationResult.Success(
@@ -119,17 +119,15 @@ public class ApiKeyValidator : IApiKeyValidator, ITransientDependency
 	{
 		if (!cached.IsValid)
 		{
-			return ApiKeyValidationResult.Fail(
-				cached.ErrorCode ?? ApiKeyErrorCodes.InvalidApiKey,
-				cached.FailureMessage ?? "无效的 API Key");
+			return ApiKeyValidationResult.Fail(cached.FailureMessage ?? "无效的 API Key");
 		}
 
-		// 检查 IP（缓存中的有效 Key 也需要检查 IP）
+		// 检查 IP
 		if (cached.AllowedIpAddresses?.Count > 0 && !string.IsNullOrEmpty(ipAddress))
 		{
 			if (!cached.AllowedIpAddresses.Contains(ipAddress))
 			{
-				return ApiKeyValidationResult.Fail(ApiKeyErrorCodes.IpAddressNotAllowed, "IP 地址不在允许列表中");
+				return ApiKeyValidationResult.Fail("IP 地址不在允许列表中");
 			}
 		}
 
@@ -170,8 +168,7 @@ public class ApiKeyValidator : IApiKeyValidator, ITransientDependency
 		var cacheItem = new ApiKeyCacheItem
 		{
 			IsValid = false,
-			ErrorCode = ApiKeyErrorCodes.InvalidApiKey,
-			FailureMessage = "无效的 API Key"
+			FailureMessage = "Invaild API Key"
 		};
 
 		await _cache.SetAsync(
@@ -206,12 +203,10 @@ public class ApiKeyValidator : IApiKeyValidator, ITransientDependency
 public class ApiKeyCacheItem
 {
 	public bool IsValid { get; set; }
-	public string? ErrorCode { get; set; }
 	public string? FailureMessage { get; set; }
 	public Guid? ApiKeyId { get; set; }
 	public string? ClientId { get; set; }
 	public string? ClientName { get; set; }
-	public Guid? TenantId { get; set; }
 	public Guid? UserId { get; set; }
 	public List<string>? Roles { get; set; }
 	public List<string>? Permissions { get; set; }

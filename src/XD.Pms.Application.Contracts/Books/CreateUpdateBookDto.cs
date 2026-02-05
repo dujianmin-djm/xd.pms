@@ -10,7 +10,7 @@ public class CreateUpdateBookDto
     public string Name { get; set; } = string.Empty;
 
     [Required]
-    public BookType Type { get; set; } = BookType.Undefined;
+    public int Type { get; set; } = 0;
 
     [Required]
     [DataType(DataType.Date)]

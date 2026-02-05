@@ -24,9 +24,6 @@ public class EntityFrameworkCorePmsDbSchemaMigrator : IPmsDbSchemaMigrator, ITra
          * current scope.
          */
 
-        await _serviceProvider
-            .GetRequiredService<PmsDbContext>()
-            .Database
-            .MigrateAsync();
+        await _serviceProvider.GetRequiredService<PmsDbContext>().Database.MigrateAsync();
     }
 }

@@ -8,7 +8,7 @@ public class BookDto : AuditedEntityDto<Guid>
 {
     public required string Name { get; set; }
 
-    public BookType Type { get; set; }
+    public int Type { get; set; }
 
     public DateTime PublishDate { get; set; }
 

@@ -16,9 +16,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	private readonly IApiKeyRepository _apiKeyRepository;
 	private readonly ApiKeyManager _apiKeyManager;
 
-	public ApiKeyAppService(
-		IApiKeyRepository apiKeyRepository,
-		ApiKeyManager apiKeyManager)
+	public ApiKeyAppService(IApiKeyRepository apiKeyRepository, ApiKeyManager apiKeyManager)
 	{
 		_apiKeyRepository = apiKeyRepository;
 		_apiKeyManager = apiKeyManager;
@@ -29,9 +27,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	/// </summary>
 	public async Task<PagedResultDto<ApiKeyDto>> GetListAsync(ApiKeyListInput input)
 	{
-		var totalCount = await _apiKeyRepository.GetCountAsync(
-			input.Filter,
-			input.IsActive);
+		var totalCount = await _apiKeyRepository.GetCountAsync(input.Filter, input.IsActive);
 
 		var items = await _apiKeyRepository.GetListAsync(
 			input.Filter,

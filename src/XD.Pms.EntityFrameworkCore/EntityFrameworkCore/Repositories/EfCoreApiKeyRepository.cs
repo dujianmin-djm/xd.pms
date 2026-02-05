@@ -94,7 +94,7 @@ public class EfCoreApiKeyRepository : EfCoreRepository<PmsDbContext, ApiKey, Gui
 		var dbContext = await GetDbContextAsync();
 
 		await dbContext.Database.ExecuteSqlInterpolatedAsync(
-			$@"UPDATE PmsApiKeys 
+			$@"UPDATE T_SYS_ApiKeys 
                SET LastUsedAt = {lastUsedAt}, 
                    LastUsedIp = {lastUsedIp},
                    UsageCount = UsageCount + 1

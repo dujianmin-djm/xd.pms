@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -12,7 +12,127 @@ namespace XD.Pms.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AbpAuditLogExcelFiles",
+                name: "T_BD_Books",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    PublishDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Price = table.Column<float>(type: "real", nullable: false),
+                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_BD_Books", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_OIDC_Applications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApplicationType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    ClientId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ClientSecret = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClientType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    ConsentType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DisplayNames = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    JsonWebKeySet = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Permissions = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PostLogoutRedirectUris = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RedirectUris = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Requirements = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Settings = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FrontChannelLogoutUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClientUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LogoUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_OIDC_Applications", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_OIDC_Scopes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Descriptions = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DisplayNames = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Resources = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_OIDC_Scopes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_ApiKeys",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    KeyHash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    KeyPrefix = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    ClientId = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    ClientName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastUsedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastUsedIp = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    UsageCount = table.Column<long>(type: "bigint", nullable: false),
+                    Roles = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Permissions = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    AllowedIpAddresses = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    RateLimitPerMinute = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_ApiKeys", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_AuditLogExcelFiles",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -23,11 +143,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpAuditLogExcelFiles", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_AuditLogExcelFiles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpAuditLogs",
+                name: "T_SYS_AuditLogs",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -57,11 +177,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpAuditLogs", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_AuditLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpBackgroundJobs",
+                name: "T_SYS_BackgroundJobs",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -79,11 +199,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpBackgroundJobs", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_BackgroundJobs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpBlobContainers",
+                name: "T_SYS_BlobContainers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -94,11 +214,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpBlobContainers", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_BlobContainers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpClaimTypes",
+                name: "T_SYS_ClaimTypes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -115,11 +235,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpClaimTypes", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_ClaimTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpFeatureGroups",
+                name: "T_SYS_FeatureGroups",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -129,11 +249,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpFeatureGroups", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_FeatureGroups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpFeatures",
+                name: "T_SYS_Features",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -151,11 +271,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpFeatures", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_Features", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpFeatureValues",
+                name: "T_SYS_FeatureValues",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -166,11 +286,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpFeatureValues", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_FeatureValues", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpLinkUsers",
+                name: "T_SYS_LinkUsers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -181,11 +301,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpLinkUsers", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_LinkUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpOrganizationUnits",
+                name: "T_SYS_OrganizationUnits",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -206,16 +326,16 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpOrganizationUnits", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_OrganizationUnits", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AbpOrganizationUnits_AbpOrganizationUnits_ParentId",
+                        name: "FK_T_SYS_OrganizationUnits_T_SYS_OrganizationUnits_ParentId",
                         column: x => x.ParentId,
-                        principalTable: "AbpOrganizationUnits",
+                        principalTable: "T_SYS_OrganizationUnits",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpPermissionGrants",
+                name: "T_SYS_PermissionGrants",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -226,11 +346,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpPermissionGrants", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_PermissionGrants", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpPermissionGroups",
+                name: "T_SYS_PermissionGroups",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -240,11 +360,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpPermissionGroups", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_PermissionGroups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpPermissions",
+                name: "T_SYS_Permissions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -260,11 +380,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpPermissions", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_Permissions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpRoles",
+                name: "T_SYS_Roles",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -281,11 +401,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpRoles", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_Roles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpSecurityLogs",
+                name: "T_SYS_SecurityLogs",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -306,17 +426,17 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpSecurityLogs", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_SecurityLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpSessions",
+                name: "T_SYS_Sessions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SessionId = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     Device = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    DeviceInfo = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
+                    DeviceInfo = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ClientId = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
@@ -327,11 +447,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpSessions", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_Sessions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpSettingDefinitions",
+                name: "T_SYS_SettingDefinitions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -347,11 +467,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpSettingDefinitions", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_SettingDefinitions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpSettings",
+                name: "T_SYS_Settings",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -362,34 +482,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpSettings", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_Settings", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpTenants",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    NormalizedName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    EntityVersion = table.Column<int>(type: "int", nullable: false),
-                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastModifierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    DeleterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletionTime = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpTenants", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpUserDelegations",
+                name: "T_SYS_UserDelegations",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -401,11 +498,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpUserDelegations", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_UserDelegations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpUsers",
+                name: "T_SYS_Users",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -442,350 +539,11 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpUsers", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AppBooks",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    PublishDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Price = table.Column<float>(type: "real", nullable: false),
-                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastModifierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppBooks", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OpenIddictApplications",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ApplicationType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    ClientId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    ClientSecret = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClientType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    ConsentType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DisplayNames = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    JsonWebKeySet = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Permissions = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PostLogoutRedirectUris = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RedirectUris = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Requirements = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Settings = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClientUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LogoUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastModifierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    DeleterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletionTime = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OpenIddictApplications", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OpenIddictScopes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Descriptions = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DisplayNames = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Properties = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Resources = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastModifierId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    DeleterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletionTime = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OpenIddictScopes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpAuditLogActions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    AuditLogId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ServiceName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    MethodName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
-                    Parameters = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    ExecutionTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExecutionDuration = table.Column<int>(type: "int", nullable: false),
-                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpAuditLogActions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AbpAuditLogActions_AbpAuditLogs_AuditLogId",
-                        column: x => x.AuditLogId,
-                        principalTable: "AbpAuditLogs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpEntityChanges",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AuditLogId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ChangeTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ChangeType = table.Column<byte>(type: "tinyint", nullable: false),
-                    EntityTenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    EntityId = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
-                    EntityTypeFullName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpEntityChanges", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AbpEntityChanges_AbpAuditLogs_AuditLogId",
-                        column: x => x.AuditLogId,
-                        principalTable: "AbpAuditLogs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpBlobs",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ContainerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    Content = table.Column<byte[]>(type: "varbinary(max)", maxLength: 2147483647, nullable: true),
-                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpBlobs", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AbpBlobs_AbpBlobContainers_ContainerId",
-                        column: x => x.ContainerId,
-                        principalTable: "AbpBlobContainers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpOrganizationUnitRoles",
-                columns: table => new
-                {
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrganizationUnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpOrganizationUnitRoles", x => new { x.OrganizationUnitId, x.RoleId });
-                    table.ForeignKey(
-                        name: "FK_AbpOrganizationUnitRoles_AbpOrganizationUnits_OrganizationUnitId",
-                        column: x => x.OrganizationUnitId,
-                        principalTable: "AbpOrganizationUnits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AbpOrganizationUnitRoles_AbpRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AbpRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpRoleClaims",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ClaimType = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    ClaimValue = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpRoleClaims", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AbpRoleClaims_AbpRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AbpRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpTenantConnectionStrings",
-                columns: table => new
-                {
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpTenantConnectionStrings", x => new { x.TenantId, x.Name });
-                    table.ForeignKey(
-                        name: "FK_AbpTenantConnectionStrings_AbpTenants_TenantId",
-                        column: x => x.TenantId,
-                        principalTable: "AbpTenants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpUserClaims",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ClaimType = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    ClaimValue = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpUserClaims", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AbpUserClaims_AbpUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AbpUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpUserLogins",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ProviderKey = table.Column<string>(type: "nvarchar(196)", maxLength: 196, nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpUserLogins", x => new { x.UserId, x.LoginProvider });
-                    table.ForeignKey(
-                        name: "FK_AbpUserLogins_AbpUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AbpUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpUserOrganizationUnits",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrganizationUnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpUserOrganizationUnits", x => new { x.OrganizationUnitId, x.UserId });
-                    table.ForeignKey(
-                        name: "FK_AbpUserOrganizationUnits_AbpOrganizationUnits_OrganizationUnitId",
-                        column: x => x.OrganizationUnitId,
-                        principalTable: "AbpOrganizationUnits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AbpUserOrganizationUnits_AbpUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AbpUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpUserRoles",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpUserRoles", x => new { x.UserId, x.RoleId });
-                    table.ForeignKey(
-                        name: "FK_AbpUserRoles_AbpRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AbpRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AbpUserRoles_AbpUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AbpUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbpUserTokens",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
-                    table.ForeignKey(
-                        name: "FK_AbpUserTokens_AbpUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AbpUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OpenIddictAuthorizations",
+                name: "T_OIDC_Authorizations",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -801,39 +559,252 @@ namespace XD.Pms.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OpenIddictAuthorizations", x => x.Id);
+                    table.PrimaryKey("PK_T_OIDC_Authorizations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OpenIddictAuthorizations_OpenIddictApplications_ApplicationId",
+                        name: "FK_T_OIDC_Authorizations_T_OIDC_Applications_ApplicationId",
                         column: x => x.ApplicationId,
-                        principalTable: "OpenIddictApplications",
+                        principalTable: "T_OIDC_Applications",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "AbpEntityPropertyChanges",
+                name: "T_SYS_AuditLogActions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    EntityChangeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    NewValue = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
-                    OriginalValue = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
-                    PropertyName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    PropertyTypeFullName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false)
+                    AuditLogId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ServiceName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    MethodName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    Parameters = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    ExecutionTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExecutionDuration = table.Column<int>(type: "int", nullable: false),
+                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AbpEntityPropertyChanges", x => x.Id);
+                    table.PrimaryKey("PK_T_SYS_AuditLogActions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AbpEntityPropertyChanges_AbpEntityChanges_EntityChangeId",
-                        column: x => x.EntityChangeId,
-                        principalTable: "AbpEntityChanges",
+                        name: "FK_T_SYS_AuditLogActions_T_SYS_AuditLogs_AuditLogId",
+                        column: x => x.AuditLogId,
+                        principalTable: "T_SYS_AuditLogs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "OpenIddictTokens",
+                name: "T_SYS_EntityChanges",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AuditLogId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ChangeTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ChangeType = table.Column<byte>(type: "tinyint", nullable: false),
+                    EntityTenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    EntityId = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    EntityTypeFullName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_EntityChanges", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_EntityChanges_T_SYS_AuditLogs_AuditLogId",
+                        column: x => x.AuditLogId,
+                        principalTable: "T_SYS_AuditLogs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_Blobs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ContainerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Content = table.Column<byte[]>(type: "varbinary(max)", maxLength: 2147483647, nullable: true),
+                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_Blobs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_Blobs_T_SYS_BlobContainers_ContainerId",
+                        column: x => x.ContainerId,
+                        principalTable: "T_SYS_BlobContainers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_OrganizationUnitRoles",
+                columns: table => new
+                {
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrganizationUnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_OrganizationUnitRoles", x => new { x.OrganizationUnitId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_T_SYS_OrganizationUnitRoles_T_SYS_OrganizationUnits_OrganizationUnitId",
+                        column: x => x.OrganizationUnitId,
+                        principalTable: "T_SYS_OrganizationUnits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_OrganizationUnitRoles_T_SYS_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "T_SYS_Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_RoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ClaimType = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    ClaimValue = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_RoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_RoleClaims_T_SYS_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "T_SYS_Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_UserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ClaimType = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    ClaimValue = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_UserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserClaims_T_SYS_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "T_SYS_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_UserLogins",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ProviderKey = table.Column<string>(type: "nvarchar(196)", maxLength: 196, nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_UserLogins", x => new { x.UserId, x.LoginProvider });
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserLogins_T_SYS_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "T_SYS_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_UserOrganizationUnits",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrganizationUnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_UserOrganizationUnits", x => new { x.OrganizationUnitId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserOrganizationUnits_T_SYS_OrganizationUnits_OrganizationUnitId",
+                        column: x => x.OrganizationUnitId,
+                        principalTable: "T_SYS_OrganizationUnits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserOrganizationUnits_T_SYS_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "T_SYS_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_UserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_UserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserRoles_T_SYS_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "T_SYS_Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserRoles_T_SYS_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "T_SYS_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_UserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_UserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserTokens_T_SYS_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "T_SYS_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_OIDC_Tokens",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -847,405 +818,437 @@ namespace XD.Pms.Migrations
                     ReferenceId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Subject = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: true),
-                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OpenIddictTokens", x => x.Id);
+                    table.PrimaryKey("PK_T_OIDC_Tokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OpenIddictTokens_OpenIddictApplications_ApplicationId",
+                        name: "FK_T_OIDC_Tokens_T_OIDC_Applications_ApplicationId",
                         column: x => x.ApplicationId,
-                        principalTable: "OpenIddictApplications",
+                        principalTable: "T_OIDC_Applications",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_OpenIddictTokens_OpenIddictAuthorizations_AuthorizationId",
+                        name: "FK_T_OIDC_Tokens_T_OIDC_Authorizations_AuthorizationId",
                         column: x => x.AuthorizationId,
-                        principalTable: "OpenIddictAuthorizations",
+                        principalTable: "T_OIDC_Authorizations",
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "T_SYS_EntityPropertyChanges",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    EntityChangeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NewValue = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
+                    OriginalValue = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
+                    PropertyName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    PropertyTypeFullName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_EntityPropertyChanges", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_EntityPropertyChanges_T_SYS_EntityChanges_EntityChangeId",
+                        column: x => x.EntityChangeId,
+                        principalTable: "T_SYS_EntityChanges",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_AbpAuditLogActions_AuditLogId",
-                table: "AbpAuditLogActions",
+                name: "IX_T_OIDC_Applications_ClientId",
+                table: "T_OIDC_Applications",
+                column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_OIDC_Authorizations_ApplicationId_Status_Subject_Type",
+                table: "T_OIDC_Authorizations",
+                columns: new[] { "ApplicationId", "Status", "Subject", "Type" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_OIDC_Scopes_Name",
+                table: "T_OIDC_Scopes",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_OIDC_Tokens_ApplicationId_Status_Subject_Type",
+                table: "T_OIDC_Tokens",
+                columns: new[] { "ApplicationId", "Status", "Subject", "Type" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_OIDC_Tokens_AuthorizationId",
+                table: "T_OIDC_Tokens",
+                column: "AuthorizationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_OIDC_Tokens_ReferenceId",
+                table: "T_OIDC_Tokens",
+                column: "ReferenceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_SYS_ApiKeys_ClientId",
+                table: "T_SYS_ApiKeys",
+                column: "ClientId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_SYS_ApiKeys_IsActive",
+                table: "T_SYS_ApiKeys",
+                column: "IsActive");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_SYS_ApiKeys_KeyHash",
+                table: "T_SYS_ApiKeys",
+                column: "KeyHash",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_SYS_ApiKeys_UserId",
+                table: "T_SYS_ApiKeys",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_SYS_AuditLogActions_AuditLogId",
+                table: "T_SYS_AuditLogActions",
                 column: "AuditLogId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpAuditLogActions_TenantId_ServiceName_MethodName_ExecutionTime",
-                table: "AbpAuditLogActions",
+                name: "IX_T_SYS_AuditLogActions_TenantId_ServiceName_MethodName_ExecutionTime",
+                table: "T_SYS_AuditLogActions",
                 columns: new[] { "TenantId", "ServiceName", "MethodName", "ExecutionTime" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpAuditLogs_TenantId_ExecutionTime",
-                table: "AbpAuditLogs",
+                name: "IX_T_SYS_AuditLogs_TenantId_ExecutionTime",
+                table: "T_SYS_AuditLogs",
                 columns: new[] { "TenantId", "ExecutionTime" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpAuditLogs_TenantId_UserId_ExecutionTime",
-                table: "AbpAuditLogs",
+                name: "IX_T_SYS_AuditLogs_TenantId_UserId_ExecutionTime",
+                table: "T_SYS_AuditLogs",
                 columns: new[] { "TenantId", "UserId", "ExecutionTime" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpBackgroundJobs_IsAbandoned_NextTryTime",
-                table: "AbpBackgroundJobs",
+                name: "IX_T_SYS_BackgroundJobs_IsAbandoned_NextTryTime",
+                table: "T_SYS_BackgroundJobs",
                 columns: new[] { "IsAbandoned", "NextTryTime" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpBlobContainers_TenantId_Name",
-                table: "AbpBlobContainers",
+                name: "IX_T_SYS_BlobContainers_TenantId_Name",
+                table: "T_SYS_BlobContainers",
                 columns: new[] { "TenantId", "Name" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpBlobs_ContainerId",
-                table: "AbpBlobs",
+                name: "IX_T_SYS_Blobs_ContainerId",
+                table: "T_SYS_Blobs",
                 column: "ContainerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpBlobs_TenantId_ContainerId_Name",
-                table: "AbpBlobs",
+                name: "IX_T_SYS_Blobs_TenantId_ContainerId_Name",
+                table: "T_SYS_Blobs",
                 columns: new[] { "TenantId", "ContainerId", "Name" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpEntityChanges_AuditLogId",
-                table: "AbpEntityChanges",
+                name: "IX_T_SYS_EntityChanges_AuditLogId",
+                table: "T_SYS_EntityChanges",
                 column: "AuditLogId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpEntityChanges_TenantId_EntityTypeFullName_EntityId",
-                table: "AbpEntityChanges",
+                name: "IX_T_SYS_EntityChanges_TenantId_EntityTypeFullName_EntityId",
+                table: "T_SYS_EntityChanges",
                 columns: new[] { "TenantId", "EntityTypeFullName", "EntityId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpEntityPropertyChanges_EntityChangeId",
-                table: "AbpEntityPropertyChanges",
+                name: "IX_T_SYS_EntityPropertyChanges_EntityChangeId",
+                table: "T_SYS_EntityPropertyChanges",
                 column: "EntityChangeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpFeatureGroups_Name",
-                table: "AbpFeatureGroups",
+                name: "IX_T_SYS_FeatureGroups_Name",
+                table: "T_SYS_FeatureGroups",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpFeatures_GroupName",
-                table: "AbpFeatures",
+                name: "IX_T_SYS_Features_GroupName",
+                table: "T_SYS_Features",
                 column: "GroupName");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpFeatures_Name",
-                table: "AbpFeatures",
+                name: "IX_T_SYS_Features_Name",
+                table: "T_SYS_Features",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpFeatureValues_Name_ProviderName_ProviderKey",
-                table: "AbpFeatureValues",
+                name: "IX_T_SYS_FeatureValues_Name_ProviderName_ProviderKey",
+                table: "T_SYS_FeatureValues",
                 columns: new[] { "Name", "ProviderName", "ProviderKey" },
                 unique: true,
                 filter: "[ProviderName] IS NOT NULL AND [ProviderKey] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpLinkUsers_SourceUserId_SourceTenantId_TargetUserId_TargetTenantId",
-                table: "AbpLinkUsers",
+                name: "IX_T_SYS_LinkUsers_SourceUserId_SourceTenantId_TargetUserId_TargetTenantId",
+                table: "T_SYS_LinkUsers",
                 columns: new[] { "SourceUserId", "SourceTenantId", "TargetUserId", "TargetTenantId" },
                 unique: true,
                 filter: "[SourceTenantId] IS NOT NULL AND [TargetTenantId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpOrganizationUnitRoles_RoleId_OrganizationUnitId",
-                table: "AbpOrganizationUnitRoles",
+                name: "IX_T_SYS_OrganizationUnitRoles_RoleId_OrganizationUnitId",
+                table: "T_SYS_OrganizationUnitRoles",
                 columns: new[] { "RoleId", "OrganizationUnitId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpOrganizationUnits_Code",
-                table: "AbpOrganizationUnits",
+                name: "IX_T_SYS_OrganizationUnits_Code",
+                table: "T_SYS_OrganizationUnits",
                 column: "Code");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpOrganizationUnits_ParentId",
-                table: "AbpOrganizationUnits",
+                name: "IX_T_SYS_OrganizationUnits_ParentId",
+                table: "T_SYS_OrganizationUnits",
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpPermissionGrants_TenantId_Name_ProviderName_ProviderKey",
-                table: "AbpPermissionGrants",
+                name: "IX_T_SYS_PermissionGrants_TenantId_Name_ProviderName_ProviderKey",
+                table: "T_SYS_PermissionGrants",
                 columns: new[] { "TenantId", "Name", "ProviderName", "ProviderKey" },
                 unique: true,
                 filter: "[TenantId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpPermissionGroups_Name",
-                table: "AbpPermissionGroups",
+                name: "IX_T_SYS_PermissionGroups_Name",
+                table: "T_SYS_PermissionGroups",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpPermissions_GroupName",
-                table: "AbpPermissions",
+                name: "IX_T_SYS_Permissions_GroupName",
+                table: "T_SYS_Permissions",
                 column: "GroupName");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpPermissions_Name",
-                table: "AbpPermissions",
+                name: "IX_T_SYS_Permissions_Name",
+                table: "T_SYS_Permissions",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpRoleClaims_RoleId",
-                table: "AbpRoleClaims",
+                name: "IX_T_SYS_RoleClaims_RoleId",
+                table: "T_SYS_RoleClaims",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpRoles_NormalizedName",
-                table: "AbpRoles",
+                name: "IX_T_SYS_Roles_NormalizedName",
+                table: "T_SYS_Roles",
                 column: "NormalizedName");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSecurityLogs_TenantId_Action",
-                table: "AbpSecurityLogs",
+                name: "IX_T_SYS_SecurityLogs_TenantId_Action",
+                table: "T_SYS_SecurityLogs",
                 columns: new[] { "TenantId", "Action" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSecurityLogs_TenantId_ApplicationName",
-                table: "AbpSecurityLogs",
+                name: "IX_T_SYS_SecurityLogs_TenantId_ApplicationName",
+                table: "T_SYS_SecurityLogs",
                 columns: new[] { "TenantId", "ApplicationName" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSecurityLogs_TenantId_Identity",
-                table: "AbpSecurityLogs",
+                name: "IX_T_SYS_SecurityLogs_TenantId_Identity",
+                table: "T_SYS_SecurityLogs",
                 columns: new[] { "TenantId", "Identity" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSecurityLogs_TenantId_UserId",
-                table: "AbpSecurityLogs",
+                name: "IX_T_SYS_SecurityLogs_TenantId_UserId",
+                table: "T_SYS_SecurityLogs",
                 columns: new[] { "TenantId", "UserId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSessions_Device",
-                table: "AbpSessions",
+                name: "IX_T_SYS_Sessions_Device",
+                table: "T_SYS_Sessions",
                 column: "Device");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSessions_SessionId",
-                table: "AbpSessions",
+                name: "IX_T_SYS_Sessions_SessionId",
+                table: "T_SYS_Sessions",
                 column: "SessionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSessions_TenantId_UserId",
-                table: "AbpSessions",
+                name: "IX_T_SYS_Sessions_TenantId_UserId",
+                table: "T_SYS_Sessions",
                 columns: new[] { "TenantId", "UserId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSettingDefinitions_Name",
-                table: "AbpSettingDefinitions",
+                name: "IX_T_SYS_SettingDefinitions_Name",
+                table: "T_SYS_SettingDefinitions",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpSettings_Name_ProviderName_ProviderKey",
-                table: "AbpSettings",
+                name: "IX_T_SYS_Settings_Name_ProviderName_ProviderKey",
+                table: "T_SYS_Settings",
                 columns: new[] { "Name", "ProviderName", "ProviderKey" },
                 unique: true,
                 filter: "[ProviderName] IS NOT NULL AND [ProviderKey] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpTenants_Name",
-                table: "AbpTenants",
-                column: "Name");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AbpTenants_NormalizedName",
-                table: "AbpTenants",
-                column: "NormalizedName");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AbpUserClaims_UserId",
-                table: "AbpUserClaims",
+                name: "IX_T_SYS_UserClaims_UserId",
+                table: "T_SYS_UserClaims",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpUserLogins_LoginProvider_ProviderKey",
-                table: "AbpUserLogins",
+                name: "IX_T_SYS_UserLogins_LoginProvider_ProviderKey",
+                table: "T_SYS_UserLogins",
                 columns: new[] { "LoginProvider", "ProviderKey" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpUserOrganizationUnits_UserId_OrganizationUnitId",
-                table: "AbpUserOrganizationUnits",
+                name: "IX_T_SYS_UserOrganizationUnits_UserId_OrganizationUnitId",
+                table: "T_SYS_UserOrganizationUnits",
                 columns: new[] { "UserId", "OrganizationUnitId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpUserRoles_RoleId_UserId",
-                table: "AbpUserRoles",
+                name: "IX_T_SYS_UserRoles_RoleId_UserId",
+                table: "T_SYS_UserRoles",
                 columns: new[] { "RoleId", "UserId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpUsers_Email",
-                table: "AbpUsers",
+                name: "IX_T_SYS_Users_Email",
+                table: "T_SYS_Users",
                 column: "Email");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpUsers_NormalizedEmail",
-                table: "AbpUsers",
+                name: "IX_T_SYS_Users_NormalizedEmail",
+                table: "T_SYS_Users",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpUsers_NormalizedUserName",
-                table: "AbpUsers",
+                name: "IX_T_SYS_Users_NormalizedUserName",
+                table: "T_SYS_Users",
                 column: "NormalizedUserName");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbpUsers_UserName",
-                table: "AbpUsers",
+                name: "IX_T_SYS_Users_UserName",
+                table: "T_SYS_Users",
                 column: "UserName");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OpenIddictApplications_ClientId",
-                table: "OpenIddictApplications",
-                column: "ClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OpenIddictAuthorizations_ApplicationId_Status_Subject_Type",
-                table: "OpenIddictAuthorizations",
-                columns: new[] { "ApplicationId", "Status", "Subject", "Type" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OpenIddictScopes_Name",
-                table: "OpenIddictScopes",
-                column: "Name");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OpenIddictTokens_ApplicationId_Status_Subject_Type",
-                table: "OpenIddictTokens",
-                columns: new[] { "ApplicationId", "Status", "Subject", "Type" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OpenIddictTokens_AuthorizationId",
-                table: "OpenIddictTokens",
-                column: "AuthorizationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OpenIddictTokens_ReferenceId",
-                table: "OpenIddictTokens",
-                column: "ReferenceId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AbpAuditLogActions");
+                name: "T_BD_Books");
 
             migrationBuilder.DropTable(
-                name: "AbpAuditLogExcelFiles");
+                name: "T_OIDC_Scopes");
 
             migrationBuilder.DropTable(
-                name: "AbpBackgroundJobs");
+                name: "T_OIDC_Tokens");
 
             migrationBuilder.DropTable(
-                name: "AbpBlobs");
+                name: "T_SYS_ApiKeys");
 
             migrationBuilder.DropTable(
-                name: "AbpClaimTypes");
+                name: "T_SYS_AuditLogActions");
 
             migrationBuilder.DropTable(
-                name: "AbpEntityPropertyChanges");
+                name: "T_SYS_AuditLogExcelFiles");
 
             migrationBuilder.DropTable(
-                name: "AbpFeatureGroups");
+                name: "T_SYS_BackgroundJobs");
 
             migrationBuilder.DropTable(
-                name: "AbpFeatures");
+                name: "T_SYS_Blobs");
 
             migrationBuilder.DropTable(
-                name: "AbpFeatureValues");
+                name: "T_SYS_ClaimTypes");
 
             migrationBuilder.DropTable(
-                name: "AbpLinkUsers");
+                name: "T_SYS_EntityPropertyChanges");
 
             migrationBuilder.DropTable(
-                name: "AbpOrganizationUnitRoles");
+                name: "T_SYS_FeatureGroups");
 
             migrationBuilder.DropTable(
-                name: "AbpPermissionGrants");
+                name: "T_SYS_Features");
 
             migrationBuilder.DropTable(
-                name: "AbpPermissionGroups");
+                name: "T_SYS_FeatureValues");
 
             migrationBuilder.DropTable(
-                name: "AbpPermissions");
+                name: "T_SYS_LinkUsers");
 
             migrationBuilder.DropTable(
-                name: "AbpRoleClaims");
+                name: "T_SYS_OrganizationUnitRoles");
 
             migrationBuilder.DropTable(
-                name: "AbpSecurityLogs");
+                name: "T_SYS_PermissionGrants");
 
             migrationBuilder.DropTable(
-                name: "AbpSessions");
+                name: "T_SYS_PermissionGroups");
 
             migrationBuilder.DropTable(
-                name: "AbpSettingDefinitions");
+                name: "T_SYS_Permissions");
 
             migrationBuilder.DropTable(
-                name: "AbpSettings");
+                name: "T_SYS_RoleClaims");
 
             migrationBuilder.DropTable(
-                name: "AbpTenantConnectionStrings");
+                name: "T_SYS_SecurityLogs");
 
             migrationBuilder.DropTable(
-                name: "AbpUserClaims");
+                name: "T_SYS_Sessions");
 
             migrationBuilder.DropTable(
-                name: "AbpUserDelegations");
+                name: "T_SYS_SettingDefinitions");
 
             migrationBuilder.DropTable(
-                name: "AbpUserLogins");
+                name: "T_SYS_Settings");
 
             migrationBuilder.DropTable(
-                name: "AbpUserOrganizationUnits");
+                name: "T_SYS_UserClaims");
 
             migrationBuilder.DropTable(
-                name: "AbpUserRoles");
+                name: "T_SYS_UserDelegations");
 
             migrationBuilder.DropTable(
-                name: "AbpUserTokens");
+                name: "T_SYS_UserLogins");
 
             migrationBuilder.DropTable(
-                name: "AppBooks");
+                name: "T_SYS_UserOrganizationUnits");
 
             migrationBuilder.DropTable(
-                name: "OpenIddictScopes");
+                name: "T_SYS_UserRoles");
 
             migrationBuilder.DropTable(
-                name: "OpenIddictTokens");
+                name: "T_SYS_UserTokens");
 
             migrationBuilder.DropTable(
-                name: "AbpBlobContainers");
+                name: "T_OIDC_Authorizations");
 
             migrationBuilder.DropTable(
-                name: "AbpEntityChanges");
+                name: "T_SYS_BlobContainers");
 
             migrationBuilder.DropTable(
-                name: "AbpTenants");
+                name: "T_SYS_EntityChanges");
 
             migrationBuilder.DropTable(
-                name: "AbpOrganizationUnits");
+                name: "T_SYS_OrganizationUnits");
 
             migrationBuilder.DropTable(
-                name: "AbpRoles");
+                name: "T_SYS_Roles");
 
             migrationBuilder.DropTable(
-                name: "AbpUsers");
+                name: "T_SYS_Users");
 
             migrationBuilder.DropTable(
-                name: "OpenIddictAuthorizations");
+                name: "T_OIDC_Applications");
 
             migrationBuilder.DropTable(
-                name: "AbpAuditLogs");
-
-            migrationBuilder.DropTable(
-                name: "OpenIddictApplications");
+                name: "T_SYS_AuditLogs");
         }
     }
 }

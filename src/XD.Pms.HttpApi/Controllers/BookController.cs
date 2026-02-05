@@ -18,17 +18,16 @@ public class BookController : PmsControllerBase
 	}
 
 	[HttpGet("query")]
-	public async Task<ActionResult<ApiResponse<PagedResultDto<BookDto>>>> GetListAsync([FromQuery] PagedAndSortedResultRequestDto input)
+	public async Task<ActionResult<PagedResultDto<BookDto>>> GetListAsync([FromQuery] PagedAndSortedResultRequestDto input)
 	{
 		var result = await _bookAppService.GetListAsync(input);
-		return Ok(ApiResponse<PagedResultDto<BookDto>>.Succeed(true, result, "查询成功"));
+		return Ok(result);
 	}
 
 	[HttpGet("query2")]
 	[Authorize]
-	public async Task<ApiResponse<PagedResultDto<BookDto>>> GetListAsync2([FromQuery] PagedAndSortedResultRequestDto input)
+	public async Task<PagedResultDto<BookDto>> GetListAsync2([FromQuery] PagedAndSortedResultRequestDto input)
 	{
-		var result = await _bookAppService.GetListAsync(input);
-		return ApiResponse<PagedResultDto<BookDto>>.Succeed(true, result, "查询成功");
+		return await _bookAppService.GetListAsync(input);
 	}
 }

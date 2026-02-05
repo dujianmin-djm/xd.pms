@@ -62,9 +62,8 @@ public class AuthController(ITokenAppService tokenAppService) : PmsControllerBas
 	/// </summary>
 	[HttpGet("user-info")]
 	[Authorize]
-	public async Task<ActionResult<ApiResponse<UserInfoDto>>> GetUserInfoAsync()
+	public async Task<UserInfoDto> GetUserInfoAsync()
 	{
-		var result = await _tokenAppService.GetCurrentUserInfoAsync();
-		return Ok(ApiResponse<UserInfoDto>.Succeed(true, result, L["Common:OperationSuccess"].Value));
+		return await _tokenAppService.GetCurrentUserInfoAsync();
 	}
 }

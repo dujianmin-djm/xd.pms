@@ -5,7 +5,7 @@ namespace XD.Pms.Authentication.ApiKey;
 
 public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
 {
-	public const string DefaultScheme = "ApiKey";
+	public const string DefaultScheme = "Pms.ApiKey";
 
 	/// <summary>
 	/// 请求头名称
