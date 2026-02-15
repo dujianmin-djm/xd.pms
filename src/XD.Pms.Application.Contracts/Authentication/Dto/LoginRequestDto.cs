@@ -11,15 +11,20 @@ public class LoginRequestDto
 	/// 用户名或邮箱
 	/// </summary>
 	[Required]
-	[StringLength(256)]
+	[StringLength(128)]
 	public string UserNameOrEmail { get; set; } = default!;
 
 	/// <summary>
-	/// 密码
+	/// 密码（RSA 加密后的 Base64 字符串）
 	/// </summary>
 	[Required]
-	[StringLength(128)]
+	[StringLength(512)]
 	public string Password { get; set; } = default!;
+
+	/// <summary>
+	/// 密码是否加密（默认 true）
+	/// </summary>
+	public bool IsEncrypted { get; set; } = true;
 
 	/// <summary>
 	/// 客户端标识

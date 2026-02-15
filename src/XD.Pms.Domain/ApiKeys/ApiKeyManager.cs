@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Volo.Abp;
 using Volo.Abp.Domain.Services;
 using XD.Pms.ApiResponse;
 
@@ -39,7 +38,7 @@ public class ApiKeyManager : DomainService
 	{
 		if (await _apiKeyRepository.ClientIdExistsAsync(clientId))
 		{
-			throw new BusinessException(ApiResponseCode.ValidationError, $"客户端 ID 【{clientId}】 已存在");
+			throw new PmsBusinessException(ApiResponseCode.ValidationError, $"客户端 ID 【{clientId}】 已存在");
 		}
 
 		var plainKey = GenerateApiKey(keyPrefix);
@@ -77,7 +76,8 @@ public class ApiKeyManager : DomainService
 		IEnumerable<string>? roles = null,
 		IEnumerable<string>? permissions = null,
 		IEnumerable<string>? allowedIpAddresses = null,
-		int rateLimitPerMinute = 0)
+		int rateLimitPerMinute = 0,
+		Guid? userId = null)
 	{
 		var apiKey = await _apiKeyRepository.GetAsync(id);
 
@@ -88,6 +88,7 @@ public class ApiKeyManager : DomainService
 		apiKey.SetPermissions(permissions);
 		apiKey.SetAllowedIpAddresses(allowedIpAddresses);
 		apiKey.SetRateLimitPerMinute(rateLimitPerMinute);
+		apiKey.SetUserId(userId);
 
 		await _apiKeyRepository.UpdateAsync(apiKey);
 

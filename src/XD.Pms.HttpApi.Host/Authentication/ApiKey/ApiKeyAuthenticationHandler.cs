@@ -51,7 +51,6 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
 
 		// 验证
 		var result = await _apiKeyValidator.ValidateAsync(apiKey, ipAddress);
-
 		if (!result.IsValid)
 		{
 			Logger.LogWarning("API Key 验证失败: {Message}", result.ErrorMessage);
@@ -69,14 +68,10 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
 			new("client_id", result.ClientId!),
 			new("auth_type", "api_key")
 		};
-
-		// 添加用户（如果有关联）
 		if (result.UserId.HasValue)
 		{
 			claims.Add(new Claim(AbpClaimTypes.UserId, result.UserId.Value.ToString()));
 		}
-
-		// 添加角色
 		if (result.Roles != null)
 		{
 			foreach (var role in result.Roles)
@@ -85,8 +80,6 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
 				claims.Add(new Claim(OpenIddictConstants.Claims.Role, role));
 			}
 		}
-
-		// 添加权限
 		if (result.Permissions != null)
 		{
 			foreach (var permission in result.Permissions)

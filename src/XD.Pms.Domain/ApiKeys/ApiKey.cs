@@ -81,7 +81,7 @@ public class ApiKey : FullAuditedAggregateRoot<Guid>
 	public int RateLimitPerMinute { get; private set; }
 
 	/// <summary>
-	/// 关联用户 ID（可选，用于审计追踪）
+	/// 关联用户 ID
 	/// </summary>
 	public Guid? UserId { get; private set; }
 

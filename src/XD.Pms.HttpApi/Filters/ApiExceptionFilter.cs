@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
+using Volo.Abp.AspNetCore.ExceptionHandling;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.ExceptionHandling;
 using Volo.Abp.Authorization;
@@ -24,6 +26,7 @@ namespace XD.Pms.Filters;
 
 /// <summary>
 /// 自定义异常过滤器（替换 ABP 默认的 AbpExceptionFilter）
+/// 处理 Controller 内部的所有异常
 /// </summary>
 [Dependency(ReplaceServices = true)]
 [ExposeServices(typeof(AbpExceptionFilter))]
@@ -45,93 +48,106 @@ public class ApiExceptionFilter : AbpExceptionFilter
 	/// </summary>
 	private static async Task HandleApiExceptionAsync(ExceptionContext context)
 	{
-		// 记录异常
-		var apiErrorInfoBuilder = new StringBuilder();
-		apiErrorInfoBuilder.AppendLine("---------- ApiExceptionErrorInfo ----------");
-		apiErrorInfoBuilder.AppendLine($"Request Path: {context.HttpContext.Request.Path}");
-		if (context.Exception is BusinessException bizEx && !bizEx.Details.IsNullOrEmpty())
+		var exception = context.Exception;
+		var services = context.HttpContext.RequestServices;
+
+		var logger = services.GetRequiredService<ILogger<ApiExceptionFilter>>();
+		var localizer = services.GetRequiredService<IStringLocalizer<PmsResource>>();
+		var exceptionConverter = services.GetRequiredService<IExceptionToErrorInfoConverter>();
+		var exceptionOptions = services.GetRequiredService<IOptions<AbpExceptionHandlingOptions>>().Value;
+
+		// 使用 ABP 的异常转换器获取本地化消息
+		var errorInfo = exceptionConverter.Convert(exception, options =>
 		{
-			apiErrorInfoBuilder.Append(bizEx.Details);
-		}
-		var logger = context.GetService<ILogger<ApiExceptionFilter>>()!;
-		logger.LogWarning(context.Exception, "{ApiExceptionErrorInfo}", apiErrorInfoBuilder.ToString());
+			options.SendExceptionsDetailsToClients = exceptionOptions.SendExceptionsDetailsToClients;
+			options.SendStackTraceToClients = exceptionOptions.SendStackTraceToClients;
+		});
+
+		// 记录异常
+		LogException(context, exception, errorInfo, logger);
 
 		// 通知异常
 		await context.GetRequiredService<IExceptionNotifier>()
-			.NotifyAsync(new ExceptionNotificationContext(context.Exception));
-
-		// 获取本地化器
-		var localizer = context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<PmsResource>>();
+			.NotifyAsync(new ExceptionNotificationContext(exception));
 
 		// 构建自定义响应
-		var (code, message) = ConvertException(context.Exception, localizer);
+		var (code, message) = ConvertException(exception, errorInfo, localizer);
 		var response = ApiResponse<object>.Fail(code, message);
 
-		context.HttpContext.Response.StatusCode = 200;
+		context.HttpContext.Response.StatusCode = StatusCodes.Status200OK;
 		context.HttpContext.Response.Headers.Remove(AbpHttpConsts.AbpErrorFormat);
 		context.Result = new ObjectResult(response);
 		context.ExceptionHandled = true;
 	}
 
-	/// <summary>
-	/// 转换异常为错误码和消息
-	/// </summary>
-	private static (string Code, string Message) ConvertException(Exception exception, IStringLocalizer<PmsResource> localizer)
+	private static (string Code, string Message) ConvertException(
+		Exception exception,
+		RemoteServiceErrorInfo errorInfo,
+		IStringLocalizer<PmsResource> localizer)
 	{
 		return exception switch
 		{
-			// 业务异常
-			BusinessException businessEx
-				=> (businessEx.Code ?? ApiResponseCode.BadRequest, businessEx.Message),
+			PmsBusinessException pmsEx => (pmsEx.ErrorCode, pmsEx.Message),
 
-			// 授权异常
-			AbpAuthorizationException
-				=> (ApiResponseCode.Forbidden, localizer["Auth:Forbidden"].Value),
+			AbpAuthorizationException => (ApiResponseCode.Forbidden, localizer["Auth:Forbidden"].Value),
 
-			// 验证异常
-			AbpValidationException validationEx
-				=> (ApiResponseCode.ValidationError, FormatValidationErrors(validationEx)),
+			BusinessException bizEx => (ApiResponseCode.BadRequest, errorInfo.Message ?? bizEx.Message),
 
-			// 实体不存在
-			EntityNotFoundException
-				=> (ApiResponseCode.NotFound, localizer["Auth:NotFound"].Value),
+			AbpValidationException validationEx => (ApiResponseCode.ValidationError, FormatValidationErrors(validationEx, errorInfo)),
 
-			// 参数异常
-			ArgumentException argEx
-				=> (ApiResponseCode.BadRequest, argEx.Message),
+			EntityNotFoundException => (ApiResponseCode.NotFound, localizer["Auth:NotFound"].Value),
 
-			// 操作取消
-			OperationCanceledException ocEx
-				=> (ApiResponseCode.BadRequest, ocEx.Message),
+			ArgumentException argEx => (ApiResponseCode.BadRequest, argEx.Message),
 
-			// 未知异常
+			OperationCanceledException ocEx => (ApiResponseCode.BadRequest, ocEx.Message),
+
+			AbpException abpEx => (ApiResponseCode.BadRequest, abpEx.Message),
+
 			_ => (ApiResponseCode.InternalError, localizer["Auth:ServerError"].Value)
 		};
 	}
 
-	/// <summary>
-	/// 格式化验证错误
-	/// </summary>
-	private static string FormatValidationErrors(AbpValidationException exception)
+	private static string FormatValidationErrors(AbpValidationException exception, RemoteServiceErrorInfo errorInfo)
 	{
-		if (exception.ValidationErrors == null || exception.ValidationErrors.Count == 0)
+		if (errorInfo.ValidationErrors != null && errorInfo.ValidationErrors.Length > 0)
 		{
-			return exception.Message;
+			var errors = errorInfo.ValidationErrors.SelectMany(e => e.Members.Select(m => $"{m}: {e.Message}"));
+			return string.Join("; ", errors);
 		}
 
-		var errors = exception.ValidationErrors
-			.SelectMany(e => e.MemberNames.Select(m => $"{m}: {e.ErrorMessage}"))
-			.ToList();
+		if (exception.ValidationErrors != null && exception.ValidationErrors.Count > 0)
+		{
+			var errors = exception.ValidationErrors.SelectMany(e => e.MemberNames.Select(m => $"{m}: {e.ErrorMessage}"));
+			return string.Join("; ", errors);
+		}
 
-		return string.Join("; ", errors);
+		return exception.Message;
 	}
 
-	/// <summary>
-	/// 判断是否是 API 请求
-	/// </summary>
+	private static void LogException(
+		ExceptionContext context, 
+		Exception exception,
+		RemoteServiceErrorInfo errorInfo,
+		ILogger<ApiExceptionFilter> logger)
+	{
+		var logBuilder = new StringBuilder();
+		logBuilder.AppendLine("---------- API Exception ----------");
+		logBuilder.AppendLine($"Request Path: {context.HttpContext.Request.Path}");
+		if (exception is PmsBusinessException pmsEx && !string.IsNullOrEmpty(pmsEx.Details))
+		{
+			logBuilder.Append($"Details: {pmsEx.Details}");
+		}
+		if (errorInfo.ValidationErrors != null && errorInfo.ValidationErrors.Length > 0)
+		{
+			var errors = errorInfo.ValidationErrors.SelectMany(e => e.Members.Select(m => $"{m}: {e.Message}"));
+			logBuilder.Append($"Validation Errors: {errors}"); 
+		}
+		logger.LogWarning(exception, "{ExceptionInfo}", logBuilder.ToString());
+	}
+
 	private static bool IsApiRequest(HttpContext context)
 	{
 		var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";
-		return path.StartsWith("/papi/");
+		return path.StartsWith("/papi/") || path.StartsWith("/api/");
 	}
 }

@@ -1,8 +1,5 @@
-using Autofac.Core;
-using Azure.Core;
 using Medallion.Threading;
 using Medallion.Threading.FileSystem;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
@@ -24,9 +21,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Mvc;
+using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
 using Volo.Abp.Caching;
@@ -37,6 +36,7 @@ using Volo.Abp.OpenIddict;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.Security.Claims;
 using Volo.Abp.Swashbuckle;
+using Volo.Abp.Timing;
 using Volo.Abp.VirtualFileSystem;
 using XD.Pms.ApiKeys;
 using XD.Pms.Authentication;
@@ -111,19 +111,17 @@ public class PmsHttpApiHostModule : AbpModule
 		ConfigureAutoApiControllers();
         ConfigureAuthentication(context.Services);
         ConfigureVirtualFileSystem(hostingEnvironment);
-        ConfigureDataProtection(context.Services, hostingEnvironment);
+        ConfigureDataProtection(context.Services, hostingEnvironment, configuration);
         ConfigureDistributedLocking(context.Services);
         ConfigureCors(context.Services, configuration);
         ConfigureSwaggerServices(context.Services, configuration);
 
-		// 显示详细身份认证错误信息
 		if (hostingEnvironment.IsDevelopment())
 		{
 			IdentityModelEventSource.ShowPII = true;
 			IdentityModelEventSource.LogCompleteSecurityArtifact = true;
 		}
 
-		// 禁用 HTTPS 要求
 		if (!configuration.GetValue<bool>("AuthServer:RequireHttpsMetadata"))
 		{
 			Configure<OpenIddictServerAspNetCoreOptions>(options =>
@@ -141,21 +139,28 @@ public class PmsHttpApiHostModule : AbpModule
 		{
 			options.IsDynamicPermissionStoreEnabled = true;
 		});
-
-		// 注册 TokenSettings
-		context.Services.Configure<TokenSettings>(configuration.GetSection(TokenSettings.SectionName));
-
-		// 注册 HttpClient
-		context.Services.AddHttpClient();
-
-		context.Services.AddPmsHealthChecks();
-
-		// 添加响应包装过滤器
+		
 		Configure<MvcOptions>(options =>
 		{
 			options.Filters.Add<ApiResponseWrapperFilter>();
 		});
 
+		Configure<AbpAntiForgeryOptions>(options =>
+		{
+			options.AutoValidate = false;
+			options.TokenCookie.Name = "PMS.XSRF-TOKEN";
+			options.TokenCookie.SameSite = SameSiteMode.Lax;
+			options.TokenCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+		});
+
+		Configure<AbpClockOptions>(options =>
+		{
+			options.Kind = DateTimeKind.Local;
+		});
+
+		context.Services.Configure<TokenSettings>(configuration.GetSection(TokenSettings.SectionName));
+		context.Services.AddHttpClient();
+		context.Services.AddPmsHealthChecks();
 		ConfigureRequestLocalization();
 	}
 
@@ -423,7 +428,7 @@ public class PmsHttpApiHostModule : AbpModule
 		});
 	}
 
-    private static void ConfigureDataProtection(IServiceCollection services, IWebHostEnvironment hostingEnvironment)
+    private static void ConfigureDataProtection(IServiceCollection services,  IWebHostEnvironment hostingEnvironment, IConfiguration configuration)
     {
         if (!hostingEnvironment.IsDevelopment())
         {
@@ -438,9 +443,15 @@ public class PmsHttpApiHostModule : AbpModule
 			{
 				Directory.CreateDirectory(keysFolder);
 			}
-			services.AddDataProtection()
+			var build = services.AddDataProtection()
 				.SetApplicationName("Pms")
 				.PersistKeysToFileSystem(new DirectoryInfo(keysFolder));
+			var certPath = Path.Combine(hostingEnvironment.ContentRootPath, "openiddict.pfx");
+			if (File.Exists(certPath))
+			{
+				var certificate = X509CertificateLoader.LoadPkcs12FromFile(certPath, configuration["AuthServer:CertificatePassPhrase"]);
+				build.ProtectKeysWithCertificate(certificate);
+			}
 		}
 	}
 

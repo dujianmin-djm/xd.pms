@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Volo.Abp.Application.Dtos;
-using XD.Pms.ApiResponse;
 using XD.Pms.Books;
+using XD.Pms.Services.Dtos;
 
 namespace XD.Pms.Controllers;
 
@@ -18,7 +17,7 @@ public class BookController : PmsControllerBase
 	}
 
 	[HttpGet("query")]
-	public async Task<ActionResult<PagedResultDto<BookDto>>> GetListAsync([FromQuery] PagedAndSortedResultRequestDto input)
+	public async Task<ActionResult<PagedResponseDto<BookDto>>> GetListAsync([FromQuery] PagedRequestDto input)
 	{
 		var result = await _bookAppService.GetListAsync(input);
 		return Ok(result);
@@ -26,7 +25,7 @@ public class BookController : PmsControllerBase
 
 	[HttpGet("query2")]
 	[Authorize]
-	public async Task<PagedResultDto<BookDto>> GetListAsync2([FromQuery] PagedAndSortedResultRequestDto input)
+	public async Task<PagedResponseDto<BookDto>> GetListAsync2([FromQuery] PagedRequestDto input)
 	{
 		return await _bookAppService.GetListAsync(input);
 	}

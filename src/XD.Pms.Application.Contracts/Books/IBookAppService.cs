@@ -1,15 +1,10 @@
 using System;
-using Volo.Abp.Application.Dtos;
-using Volo.Abp.Application.Services;
+using XD.Pms.Services;
+using XD.Pms.Services.Dtos;
 
 namespace XD.Pms.Books;
 
-public interface IBookAppService :
-    ICrudAppService< //Defines CRUD methods
-        BookDto, //Used to show books
-        Guid, //Primary key of the book entity
-        PagedAndSortedResultRequestDto, //Used for paging/sorting
-        CreateUpdateBookDto> //Used to create/update a book
+public interface IBookAppService : ICrudAppService<BookDto, Guid, PagedRequestDto, CreateUpdateBookDto> 
 {
 
 }

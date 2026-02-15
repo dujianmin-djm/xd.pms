@@ -8,9 +8,9 @@ using Volo.Abp.Identity.Localization;
 
 namespace XD.Pms.Identity;
 
-public class IdentityUserValidator : AbpIdentityUserValidator, ITransientDependency
+public class UserValidator : AbpIdentityUserValidator, ITransientDependency
 {
-	public IdentityUserValidator(IStringLocalizer<IdentityResource> localizer) : base(localizer)
+	public UserValidator(IStringLocalizer<IdentityResource> localizer) : base(localizer)
 	{
 
 	}

@@ -2,16 +2,15 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using Volo.Abp.Application.Dtos;
 using XD.Pms.ApiKeys;
 using XD.Pms.ApiKeys.Dto;
 using XD.Pms.Permissions;
+using XD.Pms.Services.Dtos;
 
 namespace XD.Pms.Controllers;
 
-[Area("app")]
 [Route("papi/api-keys")]
-[Authorize(PmsPermissions.ApiKeys.Default)]
+[Authorize(PmsPermissions.System.ApiKeys.Default)]
 public class ApiKeyController : PmsControllerBase
 {
 	private readonly IApiKeyAppService _apiKeyAppService;
@@ -25,7 +24,7 @@ public class ApiKeyController : PmsControllerBase
 	/// 获取 API Key 列表
 	/// </summary>
 	[HttpGet]
-	public Task<PagedResultDto<ApiKeyDto>> GetListAsync([FromQuery] ApiKeyListInput input)
+	public Task<PagedResponseDto<ApiKeyDto>> GetListAsync([FromQuery] ApiKeyListInput input)
 	{
 		return _apiKeyAppService.GetListAsync(input);
 	}
@@ -46,7 +45,7 @@ public class ApiKeyController : PmsControllerBase
 	/// 创建成功后会返回明文 API Key，请妥善保存，此 Key 只会显示一次！
 	/// </remarks>
 	[HttpPost]
-	[Authorize(PmsPermissions.ApiKeys.Create)]
+	[Authorize(PmsPermissions.System.ApiKeys.Create)]
 	public Task<CreateApiKeyOutput> CreateAsync([FromBody] CreateApiKeyInput input)
 	{
 		return _apiKeyAppService.CreateAsync(input);
@@ -56,7 +55,7 @@ public class ApiKeyController : PmsControllerBase
 	/// 更新 API Key
 	/// </summary>
 	[HttpPut("{id}")]
-	[Authorize(PmsPermissions.ApiKeys.Edit)]
+	[Authorize(PmsPermissions.System.ApiKeys.Update)]
 	public Task<ApiKeyDto> UpdateAsync(Guid id, [FromBody] UpdateApiKeyInput input)
 	{
 		return _apiKeyAppService.UpdateAsync(id, input);
@@ -66,7 +65,7 @@ public class ApiKeyController : PmsControllerBase
 	/// 删除 API Key
 	/// </summary>
 	[HttpDelete("{id}")]
-	[Authorize(PmsPermissions.ApiKeys.Delete)]
+	[Authorize(PmsPermissions.System.ApiKeys.Delete)]
 	public Task DeleteAsync(Guid id)
 	{
 		return _apiKeyAppService.DeleteAsync(id);
@@ -76,7 +75,7 @@ public class ApiKeyController : PmsControllerBase
 	/// 激活 API Key
 	/// </summary>
 	[HttpPost("{id}/activate")]
-	[Authorize(PmsPermissions.ApiKeys.Edit)]
+	[Authorize(PmsPermissions.System.ApiKeys.Update)]
 	public Task ActivateAsync(Guid id)
 	{
 		return _apiKeyAppService.ActivateAsync(id);
@@ -86,7 +85,7 @@ public class ApiKeyController : PmsControllerBase
 	/// 禁用 API Key
 	/// </summary>
 	[HttpPost("{id}/deactivate")]
-	[Authorize(PmsPermissions.ApiKeys.Edit)]
+	[Authorize(PmsPermissions.System.ApiKeys.Update)]
 	public Task DeactivateAsync(Guid id)
 	{
 		return _apiKeyAppService.DeactivateAsync(id);
@@ -99,7 +98,7 @@ public class ApiKeyController : PmsControllerBase
 	/// 重新生成后旧的 Key 将立即失效，新 Key 只会显示一次！
 	/// </remarks>
 	[HttpPost("{id}/regenerate")]
-	[Authorize(PmsPermissions.ApiKeys.Edit)]
+	[Authorize(PmsPermissions.System.ApiKeys.Update)]
 	public Task<RegenerateApiKeyOutput> RegenerateAsync(Guid id)
 	{
 		return _apiKeyAppService.RegenerateAsync(id);

@@ -32,6 +32,11 @@ public class CreateApiKeyInput
 	public DateTime? ExpiresAt { get; set; }
 
 	/// <summary>
+	/// 关联用户
+	/// </summary>
+	public Guid? UserId { get; set; }
+
+	/// <summary>
 	/// 角色列表
 	/// </summary>
 	public List<string>? Roles { get; set; }

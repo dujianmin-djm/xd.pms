@@ -13,32 +13,23 @@ namespace XD.Pms.EntityFrameworkCore.Repositories;
 
 public class EfCoreApiKeyRepository : EfCoreRepository<PmsDbContext, ApiKey, Guid>, IApiKeyRepository
 {
-	public EfCoreApiKeyRepository(IDbContextProvider<PmsDbContext> dbContextProvider)
-		: base(dbContextProvider)
+	public EfCoreApiKeyRepository(IDbContextProvider<PmsDbContext> dbContextProvider) : base(dbContextProvider)
 	{
 	}
 
 	public async Task<ApiKey?> FindByKeyHashAsync(string keyHash, CancellationToken cancellationToken = default)
 	{
-		var dbSet = await GetDbSetAsync();
-
-		return await dbSet
-			.FirstOrDefaultAsync(x => x.KeyHash == keyHash, cancellationToken);
+		return await (await GetDbSetAsync()).FirstOrDefaultAsync(x => x.KeyHash == keyHash, cancellationToken);
 	}
 
 	public async Task<ApiKey?> FindByClientIdAsync(string clientId, CancellationToken cancellationToken = default)
 	{
-		var dbSet = await GetDbSetAsync();
-
-		return await dbSet
-			.FirstOrDefaultAsync(x => x.ClientId == clientId, cancellationToken);
+		return await (await GetDbSetAsync()).FirstOrDefaultAsync(x => x.ClientId == clientId, cancellationToken);
 	}
 
 	public async Task<bool> ClientIdExistsAsync(string clientId, Guid? excludeId = null, CancellationToken cancellationToken = default)
 	{
-		var dbSet = await GetDbSetAsync();
-
-		return await dbSet
+		return await (await GetDbSetAsync())
 			.Where(x => x.ClientId == clientId)
 			.WhereIf(excludeId.HasValue, x => x.Id != excludeId!.Value)
 			.AnyAsync(cancellationToken);
@@ -53,9 +44,7 @@ public class EfCoreApiKeyRepository : EfCoreRepository<PmsDbContext, ApiKey, Gui
 		int skipCount = 0,
 		CancellationToken cancellationToken = default)
 	{
-		var dbSet = await GetDbSetAsync();
-
-		return await dbSet
+		return await (await GetDbSetAsync())
 			.WhereIf(!string.IsNullOrWhiteSpace(filter), x =>
 				x.ClientId.Contains(filter!) ||
 				x.ClientName.Contains(filter!) ||
@@ -73,9 +62,7 @@ public class EfCoreApiKeyRepository : EfCoreRepository<PmsDbContext, ApiKey, Gui
 		Guid? userId = null,
 		CancellationToken cancellationToken = default)
 	{
-		var dbSet = await GetDbSetAsync();
-
-		return await dbSet
+		return await (await GetDbSetAsync())
 			.WhereIf(!string.IsNullOrWhiteSpace(filter), x =>
 				x.ClientId.Contains(filter!) ||
 				x.ClientName.Contains(filter!) ||

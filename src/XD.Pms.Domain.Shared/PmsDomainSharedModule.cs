@@ -1,17 +1,18 @@
-using XD.Pms.Localization;
 using Volo.Abp.AuditLogging;
 using Volo.Abp.BackgroundJobs;
+using Volo.Abp.BlobStoring.Database;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
+using Volo.Abp.Identity.Localization;
 using Volo.Abp.Localization;
 using Volo.Abp.Localization.ExceptionHandling;
-using Volo.Abp.Validation.Localization;
 using Volo.Abp.Modularity;
+using Volo.Abp.OpenIddict;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
+using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
-using Volo.Abp.OpenIddict;
-using Volo.Abp.BlobStoring.Database;
+using XD.Pms.Localization;
 
 namespace XD.Pms;
 
@@ -47,10 +48,9 @@ public class PmsDomainSharedModule : AbpModule
                 .AddBaseTypes(typeof(AbpValidationResource))
                 .AddVirtualJson("/Localization/Pms");
 
-            options.DefaultResourceType = typeof(PmsResource);
+			options.DefaultResourceType = typeof(PmsResource);
 
 			options.Languages.Add(new LanguageInfo("zh-Hans", "zh-Hans", "简体中文"));
-			options.Languages.Add(new LanguageInfo("zh-Hant", "zh-Hant", "繁體中文"));
 			options.Languages.Add(new LanguageInfo("en", "en", "English"));
         });
         

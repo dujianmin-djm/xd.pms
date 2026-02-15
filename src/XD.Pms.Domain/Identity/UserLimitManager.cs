@@ -11,14 +11,14 @@ using XD.Pms.Features;
 
 namespace XD.Pms.Identity;
 
-public class IdentityUserLimitManager : DomainService
+public class UserLimitManager : DomainService
 {
 	private readonly IIdentityUserRepository _userRepository;
 	private readonly IStringLocalizer<PmsResource> _localizer;
 	private readonly IFeatureChecker _featureChecker;
 	private readonly IAbpDistributedLock _distributedLock;
 
-	public IdentityUserLimitManager(
+	public UserLimitManager(
 		IIdentityUserRepository userRepository,
 		IStringLocalizer<PmsResource> localizer,
 		IFeatureChecker featureChecker,
@@ -65,8 +65,8 @@ public class IdentityUserLimitManager : DomainService
 
 	public async Task CheckUserLimitWithLockAsync()
 	{
-		await using var handle = await _distributedLock.TryAcquireAsync(nameof(IdentityUserLimitManager));
-		Logger.LogDebug($"Lock is acquired for IdentityUserLimitManager.");
+		await using var handle = await _distributedLock.TryAcquireAsync(nameof(UserLimitManager));
+		Logger.LogDebug($"Lock is acquired for UserLimitManager.");
 		if (handle != null)
 		{
 			await CheckUserLimitAsync();
@@ -75,6 +75,6 @@ public class IdentityUserLimitManager : DomainService
 		{
 			throw new UserFriendlyException(_localizer["Tip:SystemBusyTryAgain"]);
 		}
-		Logger.LogDebug($"Lock is released for IdentityUserLimitManager.");
+		Logger.LogDebug($"Lock is released for UserLimitManager.");
 	}
 }

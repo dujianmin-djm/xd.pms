@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Shouldly;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.Modularity;
 using Volo.Abp.Validation;
+using XD.Pms.Services.Dtos;
 using Xunit;
 
 namespace XD.Pms.Books;
@@ -24,11 +24,11 @@ public abstract class BookAppService_Tests<TStartupModule> : PmsApplicationTestB
     {
         //Act
         var result = await _bookAppService.GetListAsync(
-            new PagedAndSortedResultRequestDto()
+            new PagedRequestDto()
         );
 
         //Assert
-        result.TotalCount.ShouldBeGreaterThan(0);
+        result.Total.ShouldBeGreaterThan(0);
         result.Items.ShouldContain(b => b.Name == "1984");
     }
 

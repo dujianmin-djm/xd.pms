@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Threading.Tasks;
 using XD.Pms.ApiResponse;
 
 namespace XD.Pms.Filters;
@@ -29,14 +30,14 @@ public class ApiResponseWrapperFilter : IAsyncResultFilter
 			var wrappedResult = new ApiResponse<object>(objectResult.StatusCode?.ToString() ?? "200", true, objectResult.Value);
 			context.Result = new ObjectResult(wrappedResult)
 			{
-				StatusCode = 200
+				StatusCode = StatusCodes.Status200OK
 			};
 		}
 		else if (context.Result is EmptyResult)
 		{
 			context.Result = new ObjectResult(ApiResponse<object>.Succeed(true, null))
 			{
-				StatusCode = 200
+				StatusCode = StatusCodes.Status200OK
 			};
 		}
 

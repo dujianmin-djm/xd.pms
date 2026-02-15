@@ -44,7 +44,6 @@ public class ApiKeyConfiguration : IEntityTypeConfiguration<ApiKey>
 		builder.Property(x => x.LastUsedIp)
 			.HasMaxLength(50);
 
-		// 索引
 		builder.HasIndex(x => x.KeyHash).IsUnique();
 		builder.HasIndex(x => x.ClientId).IsUnique();
 		builder.HasIndex(x => x.IsActive);

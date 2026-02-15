@@ -13,7 +13,7 @@ using XD.Pms.EntityFrameworkCore;
 namespace XD.Pms.Migrations
 {
     [DbContext(typeof(PmsDbContext))]
-    [Migration("20260205064942_Initial")]
+    [Migration("20260215114810_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -22,7 +22,7 @@ namespace XD.Pms.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("_Abp_DatabaseProvider", EfCoreDatabaseProvider.SqlServer)
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -675,6 +675,12 @@ namespace XD.Pms.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("CreationTime");
 
+                    b.Property<string>("Description")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("");
+
                     b.Property<int>("EntityVersion")
                         .HasColumnType("int");
 
@@ -682,6 +688,11 @@ namespace XD.Pms.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("bit")
@@ -705,6 +716,10 @@ namespace XD.Pms.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("Number")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("TenantId");
@@ -712,6 +727,11 @@ namespace XD.Pms.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName");
+
+                    b.HasIndex("Number")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Role_Number")
+                        .HasFilter("[Number] IS NOT NULL");
 
                     b.ToTable("T_SYS_Roles", (string)null);
                 });
@@ -909,6 +929,12 @@ namespace XD.Pms.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("DeletionTime");
 
+                    b.Property<string>("Description")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -928,6 +954,11 @@ namespace XD.Pms.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ExtraProperties");
+
+                    b.Property<int>("Gender")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")

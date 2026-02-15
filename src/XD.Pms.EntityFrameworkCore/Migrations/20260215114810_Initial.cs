@@ -396,6 +396,9 @@ namespace XD.Pms.Migrations
                     IsPublic = table.Column<bool>(type: "bit", nullable: false),
                     EntityVersion = table.Column<int>(type: "int", nullable: false),
                     CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true, defaultValue: ""),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    Number = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false)
                 },
@@ -527,6 +530,8 @@ namespace XD.Pms.Migrations
                     ShouldChangePasswordOnNextLogin = table.Column<bool>(type: "bit", nullable: false),
                     EntityVersion = table.Column<int>(type: "int", nullable: false),
                     LastPasswordChangeTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true, defaultValue: ""),
+                    Gender = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
                     CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -1041,6 +1046,13 @@ namespace XD.Pms.Migrations
                 name: "IX_T_SYS_RoleClaims_RoleId",
                 table: "T_SYS_RoleClaims",
                 column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Role_Number",
+                table: "T_SYS_Roles",
+                column: "Number",
+                unique: true,
+                filter: "[Number] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_SYS_Roles_NormalizedName",

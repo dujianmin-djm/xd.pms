@@ -137,11 +137,11 @@ public class TokenAppService : PmsAppService, ITokenAppService
 	{
 		if (CurrentUser.Id == null)
 		{
-			throw new BusinessException(ApiResponseCode.Unauthorized, L["Auth:Unauthorized"].Value);
+			throw new PmsBusinessException(ApiResponseCode.Unauthorized, L["Auth:Unauthorized"].Value);
 		}
 
 		var user = await _userManager.FindByIdAsync(CurrentUser.Id.Value.ToString())
-			?? throw new BusinessException(ApiResponseCode.BadRequest, L["Auth:AccountNotFound"].Value);
+			?? throw new PmsBusinessException(ApiResponseCode.BadRequest, L["Auth:AccountNotFound"].Value);
 
 		var roles = await _userManager.GetRolesAsync(user);
 
@@ -170,14 +170,14 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			var error = _jsonSerializer.Deserialize<OpenIddictErrorResponse>(responseContent);
 			var (code, message) = GetFriendlyTokenError(error?.Error, error?.ErrorDescription, operation);
 			string details = "Request Content:" + _jsonSerializer.Serialize(data, indented: true) + "\r\nResponse:" + responseContent;
-			throw new BusinessException(code, message, details);
+			throw new PmsBusinessException(code, message, details);
 		}
 
 		var tokenResponse = _jsonSerializer.Deserialize<OpenIddictTokenResponse>(responseContent);
 
 		if (string.IsNullOrEmpty(tokenResponse?.AccessToken))
 		{
-			throw new BusinessException(ApiResponseCode.InternalError, L["Auth:GetTokenFailed"].Value);
+			throw new PmsBusinessException(ApiResponseCode.InternalError, L["Auth:GetTokenFailed"].Value);
 		}
 
 		return new LoginResponseDto

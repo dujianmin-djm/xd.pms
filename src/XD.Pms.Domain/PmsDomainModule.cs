@@ -41,7 +41,7 @@ public class PmsDomainModule : AbpModule
 		//	options.Contributors.Remove<PmsDataSeederContributor>();
 		//});
 
-		context.Services.Replace(ServiceDescriptor.Scoped<IUserValidator<IdentityUser>, IdentityUserValidator>());
+		context.Services.Replace(ServiceDescriptor.Scoped<IUserValidator<IdentityUser>, UserValidator>());
 
 
 #if DEBUG

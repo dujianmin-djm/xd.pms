@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Volo.Abp.Application.Dtos;
 using XD.Pms.ApiKeys.Dto;
+using XD.Pms.Services.Dtos;
 
 namespace XD.Pms.ApiKeys;
 
@@ -10,7 +10,7 @@ public interface IApiKeyAppService
 	/// <summary>
 	/// 获取列表
 	/// </summary>
-	Task<PagedResultDto<ApiKeyDto>> GetListAsync(ApiKeyListInput input);
+	Task<PagedResponseDto<ApiKeyDto>> GetListAsync(ApiKeyListInput input);
 
 	/// <summary>
 	/// 获取详情

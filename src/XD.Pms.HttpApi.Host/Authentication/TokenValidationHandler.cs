@@ -2,10 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using OpenIddict.Validation;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Volo.Abp;
 using XD.Pms.ApiResponse;
 using XD.Pms.Localization;
 
@@ -41,9 +39,10 @@ public class TokenValidationHandler : IOpenIddictValidationHandler<OpenIddictVal
 			{
 				var localizer = httpContext.RequestServices.GetRequiredService<IStringLocalizer<PmsResource>>();
 
-				throw new BusinessException(
+				throw new PmsBusinessException(
 					ApiResponseCode.AccessTokenRevoked,
-					localizer?["Auth:AccessTokenRevoked"]?.Value ?? "The access token has been revoked.");
+					localizer?["Auth:AccessTokenRevoked"]?.Value ?? "The access token has been revoked."
+				);
 			}
 		}
 	}

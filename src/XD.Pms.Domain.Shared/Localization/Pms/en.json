@@ -49,7 +49,7 @@
     "Auth:AccessTokenMissing": "No access token provided",
     "Auth:AccessTokenInvalid": "The access token is invalid",
     "Auth:AccessTokenExpired": "Your session has expired. Refreshing...",
-    "Auth:AccessTokenRevoked": "Login credentials have been invalidated, please login again.",
+    "Auth:AccessTokenRevoked": "Login credentials have been invalidated(revoked), please login again.",
     "Auth:InvalidCredentials": "Invalid username or password.",
     "Auth:AccountLocked": "Account has been locked out due to invalid login attempts, please try again later or contact administrator.",
     "Auth:AccountDisabled": "Account has been disabled, please contact administrator.",
@@ -65,6 +65,7 @@
     "Auth:MethodNotAllowed": "The requested method is not allowed.",
     "Auth:TooManyRequests": "The request is made too frequently. Please try again later.",
     "Auth:ServerError": "Server internal error, please try again later.",
+    "Auth:UnexpectedError": "The request encountered an unexpected error.",
     "Auth:TwoFactorRequired": "Two-factor authentication required.",
     "Auth:TwoFactorInvalid": "Invalid verification code, please try again.",
     "Auth:ClientConfigError": "Client configuration error, please contact administrator.",
@@ -79,7 +80,23 @@
     "Validation:StringLength": "{0} must be between {1} and {2} characters.",
     "Validation:InvalidFormat": "{0} format is invalid.",
 
+    "Role:Validation:NumberExists": "The role number ({0}) already exists.",
+    "User:Validation:UserNameNotExists": "User name ({0}) not exists.",
+    "User:Validation:UserEmailNotExists": "User email ({0}) not exists.",
+
     "Common:OperationSuccess": "Operation successful.",
-    "Common:OperationFailed": "Operation failed."
+    "Common:OperationFailed": "Operation failed.",
+
+    "Permission:SystemManagement": "System management",
+    "Permission:RoleManagement": "Role management",
+    "Permission:UserManagement": "User management",
+    "Permission:ApiKeyManagement": "Api key management",
+    "Permission:BaseDataManagement": "BaseData management",
+    "Permission:BusinessManagement": "Business management",
+    "Permission:Create": "Create",
+    "Permission:Edit": "Edit",
+    "Permission:Delete": "Delete",
+    "Permission:ChangePermissions": "Change permissions",
+    "Permission:ManageRoles": "Manage roles"
   }
 }

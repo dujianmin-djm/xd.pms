@@ -50,7 +50,7 @@ public class PmsDbMigrationService : ITransientDependency
 
     private async Task MigrateDatabaseSchemaAsync()
     {
-        Logger.LogInformation($"Migrating schema for host tenant database...");
+        Logger.LogInformation($"Migrating schema for host database...");
         
         foreach (var migrator in _dbSchemaMigrators)
         {
@@ -67,7 +67,7 @@ public class PmsDbMigrationService : ITransientDependency
                 PmsConsts.AdminEmailDefaultValue)
             .WithProperty(IdentityDataSeedContributor.AdminPasswordPropertyName,
                 PmsConsts.AdminPasswordDefaultValue)
-        );
+		);
     }
 
     private bool AddInitialMigrationIfNotExist()

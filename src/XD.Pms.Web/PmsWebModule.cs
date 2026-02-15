@@ -86,9 +86,9 @@ public class PmsWebModule : AbpModule
 
 		Configure<RazorPagesOptions>(options =>
         {
-			options.Conventions.AuthorizePage("/Books/Index", PmsPermissions.Books.Default);
-            options.Conventions.AuthorizePage("/Books/CreateModal", PmsPermissions.Books.Create);
-            options.Conventions.AuthorizePage("/Books/EditModal", PmsPermissions.Books.Edit);
+			options.Conventions.AuthorizePage("/Books/Index", PmsPermissions.BaseData.Books.Default);
+            options.Conventions.AuthorizePage("/Books/CreateModal", PmsPermissions.BaseData.Books.Create);
+            options.Conventions.AuthorizePage("/Books/EditModal", PmsPermissions.BaseData.Books.Update);
         });
 
 		ConfigureDataProtection(context.Services, hostingEnvironment);

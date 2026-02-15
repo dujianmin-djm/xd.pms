@@ -3,14 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp;
-using Volo.Abp.Application.Dtos;
 using XD.Pms.ApiKeys.Dto;
 using XD.Pms.Permissions;
+using XD.Pms.Services.Dtos;
 
 namespace XD.Pms.ApiKeys;
 
 [RemoteService(IsEnabled = false)]
-[Authorize(PmsPermissions.ApiKeys.Default)]
+[Authorize(PmsPermissions.System.ApiKeys.Default)]
 public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 {
 	private readonly IApiKeyRepository _apiKeyRepository;
@@ -25,7 +25,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	/// <summary>
 	/// 获取列表
 	/// </summary>
-	public async Task<PagedResultDto<ApiKeyDto>> GetListAsync(ApiKeyListInput input)
+	public async Task<PagedResponseDto<ApiKeyDto>> GetListAsync(ApiKeyListInput input)
 	{
 		var totalCount = await _apiKeyRepository.GetCountAsync(input.Filter, input.IsActive);
 
@@ -37,9 +37,10 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 			input.MaxResultCount,
 			input.SkipCount);
 
-		return new PagedResultDto<ApiKeyDto>(
+		return new PagedResponseDto<ApiKeyDto>(
 			totalCount,
-			ObjectMapper.Map<List<ApiKey>, List<ApiKeyDto>>(items));
+			ObjectMapper.Map<List<ApiKey>, List<ApiKeyDto>>(items)
+		);
 	}
 
 	/// <summary>
@@ -54,7 +55,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	/// <summary>
 	/// 创建
 	/// </summary>
-	[Authorize(PmsPermissions.ApiKeys.Create)]
+	[Authorize(PmsPermissions.System.ApiKeys.Create)]
 	public async Task<CreateApiKeyOutput> CreateAsync(CreateApiKeyInput input)
 	{
 		var (plainKey, entity) = await _apiKeyManager.CreateAsync(
@@ -66,7 +67,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 			input.Permissions,
 			input.AllowedIpAddresses,
 			input.RateLimitPerMinute,
-			CurrentUser.Id,
+			input.UserId ??CurrentUser.Id,
 			input.KeyPrefix);
 
 		return new CreateApiKeyOutput
@@ -79,7 +80,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	/// <summary>
 	/// 更新
 	/// </summary>
-	[Authorize(PmsPermissions.ApiKeys.Edit)]
+	[Authorize(PmsPermissions.System.ApiKeys.Update)]
 	public async Task<ApiKeyDto> UpdateAsync(Guid id, UpdateApiKeyInput input)
 	{
 		var entity = await _apiKeyManager.UpdateAsync(
@@ -90,7 +91,8 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 			input.Roles,
 			input.Permissions,
 			input.AllowedIpAddresses,
-			input.RateLimitPerMinute);
+			input.RateLimitPerMinute,
+			input.UserId);
 
 		return ObjectMapper.Map<ApiKey, ApiKeyDto>(entity);
 	}
@@ -98,7 +100,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	/// <summary>
 	/// 删除
 	/// </summary>
-	[Authorize(PmsPermissions.ApiKeys.Delete)]
+	[Authorize(PmsPermissions.System.ApiKeys.Delete)]
 	public async Task DeleteAsync(Guid id)
 	{
 		await _apiKeyRepository.DeleteAsync(id);
@@ -107,7 +109,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	/// <summary>
 	/// 激活
 	/// </summary>
-	[Authorize(PmsPermissions.ApiKeys.Edit)]
+	[Authorize(PmsPermissions.System.ApiKeys.Update)]
 	public async Task ActivateAsync(Guid id)
 	{
 		await _apiKeyManager.ActivateAsync(id);
@@ -116,7 +118,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	/// <summary>
 	/// 禁用
 	/// </summary>
-	[Authorize(PmsPermissions.ApiKeys.Edit)]
+	[Authorize(PmsPermissions.System.ApiKeys.Update)]
 	public async Task DeactivateAsync(Guid id)
 	{
 		await _apiKeyManager.DeactivateAsync(id);
@@ -125,7 +127,7 @@ public class ApiKeyAppService : PmsAppService, IApiKeyAppService
 	/// <summary>
 	/// 重新生成
 	/// </summary>
-	[Authorize(PmsPermissions.ApiKeys.Edit)]
+	[Authorize(PmsPermissions.System.ApiKeys.Update)]
 	public async Task<RegenerateApiKeyOutput> RegenerateAsync(Guid id)
 	{
 		var plainKey = await _apiKeyManager.RegenerateAsync(id);

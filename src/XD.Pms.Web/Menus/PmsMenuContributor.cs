@@ -55,7 +55,7 @@ public class PmsMenuContributor : IMenuContributor
                 "BooksStore.Books",
                 l["Menu:Books"],
                 url: "/Books"
-                ).RequirePermissions(PmsPermissions.Books.Default) 
+                ).RequirePermissions(PmsPermissions.BaseData.Books.Default) 
             )
         );
         
