@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization.Permissions;
 using Volo.Abp.Data;
 using Volo.Abp.Identity;
 using Volo.Abp.ObjectExtending;
+using Volo.Abp.Users;
 using XD.Pms.ApiResponse;
 using XD.Pms.Identity.Role.Dto;
 using XD.Pms.Identity.User;
@@ -80,12 +80,7 @@ public class UserAppService : PmsAppService, IUserAppService
 		}
 		await _identityOptions.SetAsync();
 
-		var user = new IdentityUser(
-			GuidGenerator.Create(),
-			input.UserName,
-			input.Email,
-			CurrentTenant.Id
-		);
+		var user = new IdentityUser(GuidGenerator.Create(), input.UserName, input.Email, CurrentTenant.Id);
 
 		input.MapExtraPropertiesTo(user);
 
@@ -158,12 +153,10 @@ public class UserAppService : PmsAppService, IUserAppService
 	}
 
 	[HttpGet("{id}/roles")]
-	public async Task<ListResultDto<RoleDto>> GetRolesAsync(Guid id)
+	public async Task<List<RoleDto>> GetRolesAsync(Guid id)
 	{
 		var roles = (await _identityUserRepository.GetRolesAsync(id)).OrderBy(x => x.Name).ToList();
-		return new ListResultDto<RoleDto>(
-			ObjectMapper.Map<List<IdentityRole>, List<RoleDto>>(roles)
-		);
+		return ObjectMapper.Map<List<IdentityRole>, List<RoleDto>>(roles);
 	}
 
 	[HttpPut("{id}/roles")]
@@ -174,6 +167,45 @@ public class UserAppService : PmsAppService, IUserAppService
 		var user = await _userManager.GetByIdAsync(id);
 		(await _userManager.SetRolesAsync(user, input.RoleNames)).CheckErrors();
 		await _identityUserRepository.UpdateAsync(user);
+	}
+
+	/// <summary>
+	/// 管理员重置用户密码
+	/// </summary>
+	[HttpPut("reset-password/{id}")]
+	[Authorize(PmsPermissions.System.Users.ResetPassword)]
+	public async Task ResetPasswordAsync(Guid id, [FromBody] ResetPasswordDto input)
+	{
+		if (CurrentUser.Id == id)
+		{
+			throw new PmsBusinessException(
+				code: ApiResponseCode.ValidationError,
+				message: L["User:Validation:CannotResetOwnPassword"]
+			);
+		}
+		await _identityOptions.SetAsync();
+		var user = await _userManager.GetByIdAsync(id);
+		(await _userManager.RemovePasswordAsync(user)).CheckErrors();
+		(await _userManager.AddPasswordAsync(user, input.Password)).CheckErrors();
+		if (CurrentUnitOfWork != null)
+		{
+			await CurrentUnitOfWork.SaveChangesAsync();
+		}
+	}
+
+	/// <summary>
+	/// 当前用户修改密码
+	/// </summary>
+	[HttpPut("change-password")]
+	public async Task ChangePasswordAsync(ChangePasswordDto input)
+	{
+		await _identityOptions.SetAsync();
+		var user = await _userManager.GetByIdAsync(CurrentUser.GetId());
+		(await _userManager.ChangePasswordAsync(user, input.CurrentPassword, input.NewPassword)).CheckErrors();
+		if (CurrentUnitOfWork != null)
+		{
+			await CurrentUnitOfWork.SaveChangesAsync();
+		}
 	}
 
 	[HttpGet("by-username/{userName}")]

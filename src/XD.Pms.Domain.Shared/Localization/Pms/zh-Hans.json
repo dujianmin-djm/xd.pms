@@ -89,6 +89,7 @@
     "Role:Validation:NumberExists": "角色编码【{0}】已存在",
     "User:Validation:UserNameNotExists": "用户名称【{0}】不存在",
     "User:Validation:UserEmailNotExists": "用户邮箱【{0}】不存在",
+    "User:Validation:CannotResetOwnPassword": "不能重置自己的密码",
 
     "Common:OperationSuccess": "操作成功",
     "Common:OperationFailed": "操作失败",
@@ -108,9 +109,10 @@
     "Permission:BaseDataManagement": "基础管理",
     "Permission:BusinessManagement": "业务管理",
     "Permission:Create": "创建",
-    "Permission:Edit": "修改",
+    "Permission:Update": "修改",
     "Permission:Delete": "删除",
     "Permission:ChangePermissions": "更改权限",
-    "Permission:ManageRoles": "管理角色"
+    "Permission:ManageRoles": "管理角色",
+    "Permission:ResetPassword": "重置密码"
   }
 }

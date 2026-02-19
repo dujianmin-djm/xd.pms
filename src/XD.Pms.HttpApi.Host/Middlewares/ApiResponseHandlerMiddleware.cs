@@ -80,9 +80,12 @@ public class ApiResponseHandlerMiddleware
 				var analysisResult = await AnalyzeAuthenticationErrorAsync(context);
 				code = analysisResult.Code;
 				message = analysisResult.Message;
-				_logger.LogWarning(
-					"认证失败。Path: {Path}, Status: {Status}, Code: {Code}, Details: {Details}",
-					context.Request.Path, analysisResult.Status, code, analysisResult.Details);
+				if (_logger.IsEnabled(LogLevel.Information))
+				{
+					_logger.LogInformation(
+						"认证失败。Path: {Path}, Status: {Status}, Code: {Code}, Details: {Details}",
+						context.Request.Path, analysisResult.Status, code, analysisResult.Details);
+				}
 				break;
 
 			case StatusCodes.Status403Forbidden:

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Volo.Abp.Autofac" Version="10.0.3" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="10.1.0" />
     <ProjectReference Include="..\XD.Pms.EntityFrameworkCore\XD.Pms.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\XD.Pms.Application.Contracts\XD.Pms.Application.Contracts.csproj" />
   </ItemGroup>

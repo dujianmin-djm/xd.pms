@@ -1,4 +1,5 @@
 ﻿using Riok.Mapperly.Abstractions;
+using System;
 using Volo.Abp.Data;
 using Volo.Abp.Identity;
 using Volo.Abp.Mapperly;
@@ -10,8 +11,17 @@ namespace XD.Pms.Identity;
 [Mapper]
 public partial class UserToUserDtoMapper : MapperBase<IdentityUser, UserDto>
 {
+	private readonly IIdentityUserRepository _userRepository;
+
+	public UserToUserDtoMapper(IIdentityUserRepository userRepository)
+	{
+		_userRepository = userRepository;
+	}
+
 	[MapperIgnoreTarget(nameof(UserDto.Gender))]
 	[MapperIgnoreTarget(nameof(UserDto.Description))]
+	[MapperIgnoreTarget(nameof(UserDto.CreatedBy))]
+	[MapperIgnoreTarget(nameof(UserDto.LastModifiedBy))]
 	[MapperIgnoreSource(nameof(IdentityUser.ExtraProperties))]
 	[MapperIgnoreSource(nameof(IdentityUser.Name))]
 	[MapperIgnoreSource(nameof(IdentityUser.Surname))]
@@ -31,10 +41,14 @@ public partial class UserToUserDtoMapper : MapperBase<IdentityUser, UserDto>
 	[MapperIgnoreSource(nameof(IdentityUser.Logins))]
 	[MapperIgnoreSource(nameof(IdentityUser.Tokens))]
 	[MapperIgnoreSource(nameof(IdentityUser.OrganizationUnits))]
+	[MapperIgnoreSource(nameof(IdentityUser.PasswordHistories))]
+	[MapperIgnoreSource(nameof(IdentityUser.Passkeys))]
 	public override partial UserDto Map(IdentityUser source);
 
 	[MapperIgnoreTarget(nameof(UserDto.Gender))]
 	[MapperIgnoreTarget(nameof(UserDto.Description))]
+	[MapperIgnoreTarget(nameof(UserDto.CreatedBy))]
+	[MapperIgnoreTarget(nameof(UserDto.LastModifiedBy))]
 	[MapperIgnoreSource(nameof(IdentityUser.ExtraProperties))]
 	[MapperIgnoreSource(nameof(IdentityUser.Name))]
 	[MapperIgnoreSource(nameof(IdentityUser.Surname))]
@@ -54,11 +68,22 @@ public partial class UserToUserDtoMapper : MapperBase<IdentityUser, UserDto>
 	[MapperIgnoreSource(nameof(IdentityUser.Logins))]
 	[MapperIgnoreSource(nameof(IdentityUser.Tokens))]
 	[MapperIgnoreSource(nameof(IdentityUser.OrganizationUnits))]
+	[MapperIgnoreSource(nameof(IdentityUser.PasswordHistories))]
+	[MapperIgnoreSource(nameof(IdentityUser.Passkeys))]
 	public override partial void Map(IdentityUser source, UserDto destination);
 
 	public override void AfterMap(IdentityUser source, UserDto target)
 	{
 		target.Gender = source.GetProperty<Gender>("Gender");
 		target.Description = source.GetProperty<string>("Description") ?? string.Empty;
+		target.CreatedBy = GetUserName(source.CreatorId);
+		target.LastModifiedBy = GetUserName(source.LastModifierId);
+	}
+
+	private string? GetUserName(Guid? userId)
+	{
+		if (!userId.HasValue) return null;
+		var user = _userRepository.FindAsync(userId.Value).GetAwaiter().GetResult();
+		return user?.UserName;
 	}
 }

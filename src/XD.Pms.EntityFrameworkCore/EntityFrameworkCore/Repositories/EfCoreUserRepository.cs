@@ -49,6 +49,7 @@ public class EfCoreUserRepository : EfCoreRepository<PmsDbContext, IdentityUser,
 		CancellationToken cancellationToken = default)
 	{
 		return await(await GetDbSetAsync().ConfigureAwait(false))
+			//.Include(u => u.Roles)
 			.WhereIf(!userName.IsNullOrWhiteSpace(), x => x.UserName.Contains(userName!) || x.NormalizedUserName.Contains(userName!))
 			.WhereIf(!phoneNumber.IsNullOrWhiteSpace(), x => x.PhoneNumber.Contains(phoneNumber!))
 			.WhereIf(!email.IsNullOrWhiteSpace(), x => x.Email.Contains(email!) || x.NormalizedEmail.Contains(email!))

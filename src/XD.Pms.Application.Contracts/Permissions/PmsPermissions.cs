@@ -23,8 +23,8 @@ public static class PmsPermissions
 			public const string Create = Default + ".Create";
 			public const string Update = Default + ".Update";
 			public const string Delete = Default + ".Delete";
-			public const string ManagePermissions = Default + ".ManagePermissions";
-			public const string ManageRoles = Update + ".ManageRoles";
+			public const string ManageRoles = Default + ".ManageRoles";
+			public const string ResetPassword = Default + ".ResetPassword";
 		}
 
 		public static class ApiKeys

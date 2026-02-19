@@ -1,9 +1,11 @@
 using Volo.Abp.Account;
+using Volo.Abp.Authorization.Permissions;
+using Volo.Abp.FeatureManagement;
+using Volo.Abp.Identity;
 using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
-using Volo.Abp.FeatureManagement;
-using Volo.Abp.Identity;
+using XD.Pms.Permissions;
 
 namespace XD.Pms;
 
@@ -20,5 +22,5 @@ public class PmsApplicationContractsModule : AbpModule
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
         PmsDtoExtensions.Configure();
-    }
+	}
 }

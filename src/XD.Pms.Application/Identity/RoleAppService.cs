@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.Data;
 using Volo.Abp.Identity;
 using XD.Pms.ApiResponse;
@@ -49,12 +48,10 @@ public class RoleAppService : PmsAppService, IRoleAppService
 	}
 
 	[HttpGet("assignable-roles")]
-	public async Task<ListResultDto<RoleDto>> GetAssignableRolesAsync()
+	public async Task<List<RoleDto>> GetAssignableRolesAsync()
 	{
 		var roles = await _roleRepository.GetListAsync(isActive: true, sorting: nameof(IdentityRole.Name));
-		return new ListResultDto<RoleDto>(
-			ObjectMapper.Map<List<IdentityRole>, List<RoleDto>>(roles)
-		);
+		return ObjectMapper.Map<List<IdentityRole>, List<RoleDto>>(roles);
 	}
 
 	[HttpPost("add")]
@@ -122,7 +119,7 @@ public class RoleAppService : PmsAppService, IRoleAppService
 
 	[HttpDelete("batch-delete")]
 	[Authorize(PmsPermissions.System.Roles.Delete)]
-	public async Task DeleteManyAsync(IEnumerable<Guid> ids)
+	public async Task DeleteManyAsync(List<Guid> ids)
 	{
 		foreach (var id in ids)
 		{

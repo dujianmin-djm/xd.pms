@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
 using System;
@@ -45,6 +45,7 @@ using XD.Pms.EntityFrameworkCore;
 using XD.Pms.Filters;
 using XD.Pms.HealthChecks;
 using XD.Pms.Middlewares;
+using XD.Pms.Permissions;
 
 namespace XD.Pms;
 
@@ -134,10 +135,15 @@ public class PmsHttpApiHostModule : AbpModule
 				options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
 			});
 		}
-
+		
 		Configure<PermissionManagementOptions>(options =>
 		{
 			options.IsDynamicPermissionStoreEnabled = true;
+
+			// "R" = RolePermissionValueProvider.ProviderName
+			options.ProviderPolicies["R"] = PmsPermissions.System.Roles.ManagePermissions;
+			// "U" = UserPermissionValueProvider.ProviderName  
+			options.ProviderPolicies["U"] = PmsPermissions.System.Users.ManageRoles;
 		});
 		
 		Configure<MvcOptions>(options =>
@@ -260,15 +266,6 @@ public class PmsHttpApiHostModule : AbpModule
 
     private static void ConfigureAuthentication(IServiceCollection services)
 	{
-		/*	 认证方案的工作机制
-		 *	1. DefaultAuthenticateScheme  →  用于 [Authorize] 认证
-			2. DefaultChallengeScheme     →  用于 401 Challenge 响应
-			3. DefaultScheme              →  当上面两个为 null 时的回退值
-
-			如果设置了 DefaultAuthenticateScheme = "X"，则
-			- 所有 [Authorize] 请求都会使用 "X" 方案
-			- 不会触发 PolicyScheme 的 ForwardDefaultSelector
-		 */
 		services.AddAuthentication(options =>
 		{
 			options.DefaultScheme = "Pms.Smart";
@@ -400,31 +397,18 @@ public class PmsHttpApiHostModule : AbpModule
 				Description = "API Key 认证 - 在请求头中添加 X-API-Sign"
 			});
 
-			options.AddSecurityRequirement(new OpenApiSecurityRequirement
+			options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
 			{
 				{
-					new OpenApiSecurityScheme
-					{
-						Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" }
-					},
-					["Pms"]
+					new OpenApiSecuritySchemeReference("OAuth2", document), ["Pms"]
 				},
 				{
-					new OpenApiSecurityScheme
-					{
-						Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-					},
-					Array.Empty<string>()
+					new OpenApiSecuritySchemeReference("Bearer", document), []
 				},
 				{
-					new OpenApiSecurityScheme
-					{
-						Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKey" }
-					},
-					Array.Empty<string>()
+					new OpenApiSecuritySchemeReference("ApiKey", document), []
 				}
 			});
-
 		});
 	}
 

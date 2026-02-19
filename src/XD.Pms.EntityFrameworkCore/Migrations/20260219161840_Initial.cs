@@ -368,8 +368,10 @@ namespace XD.Pms.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GroupName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    GroupName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ResourceName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ManagementPermissionName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     ParentName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     DisplayName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
@@ -381,6 +383,23 @@ namespace XD.Pms.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_T_SYS_Permissions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_ResourcePermissionGrants",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ProviderName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    ResourceName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    ResourceKey = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_ResourcePermissionGrants", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -530,6 +549,7 @@ namespace XD.Pms.Migrations
                     ShouldChangePasswordOnNextLogin = table.Column<bool>(type: "bit", nullable: false),
                     EntityVersion = table.Column<int>(type: "int", nullable: false),
                     LastPasswordChangeTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LastSignInTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true, defaultValue: ""),
                     Gender = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -756,6 +776,46 @@ namespace XD.Pms.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_T_SYS_UserOrganizationUnits_T_SYS_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "T_SYS_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_UserPasskeys",
+                columns: table => new
+                {
+                    CredentialId = table.Column<byte[]>(type: "varbinary(1024)", maxLength: 1024, nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Data = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_UserPasskeys", x => x.CredentialId);
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserPasskeys_T_SYS_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "T_SYS_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_SYS_UserPasswordHistories",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_SYS_UserPasswordHistories", x => new { x.UserId, x.Password });
+                    table.ForeignKey(
+                        name: "FK_T_SYS_UserPasswordHistories_T_SYS_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "T_SYS_Users",
                         principalColumn: "Id",
@@ -1037,10 +1097,18 @@ namespace XD.Pms.Migrations
                 column: "GroupName");
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_SYS_Permissions_Name",
+                name: "IX_T_SYS_Permissions_ResourceName_Name",
                 table: "T_SYS_Permissions",
-                column: "Name",
-                unique: true);
+                columns: new[] { "ResourceName", "Name" },
+                unique: true,
+                filter: "[ResourceName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_SYS_ResourcePermissionGrants_TenantId_Name_ResourceName_ResourceKey_ProviderName_ProviderKey",
+                table: "T_SYS_ResourcePermissionGrants",
+                columns: new[] { "TenantId", "Name", "ResourceName", "ResourceKey", "ProviderName", "ProviderKey" },
+                unique: true,
+                filter: "[TenantId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_SYS_RoleClaims_RoleId",
@@ -1048,16 +1116,16 @@ namespace XD.Pms.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Role_Number",
+                name: "IX_T_SYS_Roles_NormalizedName",
+                table: "T_SYS_Roles",
+                column: "NormalizedName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_SYS_Roles_Number",
                 table: "T_SYS_Roles",
                 column: "Number",
                 unique: true,
                 filter: "[Number] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_SYS_Roles_NormalizedName",
-                table: "T_SYS_Roles",
-                column: "NormalizedName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_SYS_SecurityLogs_TenantId_Action",
@@ -1121,6 +1189,11 @@ namespace XD.Pms.Migrations
                 name: "IX_T_SYS_UserOrganizationUnits_UserId_OrganizationUnitId",
                 table: "T_SYS_UserOrganizationUnits",
                 columns: new[] { "UserId", "OrganizationUnitId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_SYS_UserPasskeys_UserId",
+                table: "T_SYS_UserPasskeys",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_SYS_UserRoles_RoleId_UserId",
@@ -1206,6 +1279,9 @@ namespace XD.Pms.Migrations
                 name: "T_SYS_Permissions");
 
             migrationBuilder.DropTable(
+                name: "T_SYS_ResourcePermissionGrants");
+
+            migrationBuilder.DropTable(
                 name: "T_SYS_RoleClaims");
 
             migrationBuilder.DropTable(
@@ -1231,6 +1307,12 @@ namespace XD.Pms.Migrations
 
             migrationBuilder.DropTable(
                 name: "T_SYS_UserOrganizationUnits");
+
+            migrationBuilder.DropTable(
+                name: "T_SYS_UserPasskeys");
+
+            migrationBuilder.DropTable(
+                name: "T_SYS_UserPasswordHistories");
 
             migrationBuilder.DropTable(
                 name: "T_SYS_UserRoles");

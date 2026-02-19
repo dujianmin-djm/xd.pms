@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -309,18 +309,10 @@ public class PmsWebModule : AbpModule
 				Description = "OAuth2 密码模式认证"
 			});
 
-			options.AddSecurityRequirement(new OpenApiSecurityRequirement
+			options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
 			{
 				{
-					new OpenApiSecurityScheme
-					{
-						Reference = new OpenApiReference
-						{
-							Type = ReferenceType.SecurityScheme,
-							Id = "oauth2"
-						}
-					},
-                    ["Pms"]
+					new OpenApiSecuritySchemeReference("oauth2", document), ["Pms"]
 				}
 			});
 
