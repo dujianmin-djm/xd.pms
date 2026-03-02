@@ -1,0 +1,18 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace XD.Pms.BaseData.Departments.Dto;
+
+public class DepartmentCreateDto
+{
+	[Required, MaxLength(50)]
+	public string Number { get; set; } = string.Empty;
+
+	[Required, MaxLength(100)]
+	public string Name { get; set; } = string.Empty;
+
+	[MaxLength(512)]
+	public string? Description { get; set; }
+
+	public Guid? ParentId { get; set; }
+}

@@ -9,7 +9,7 @@ namespace XD.Pms.Filters;
 /// <summary>
 /// API 响应包装结果过滤器
 /// </summary>
-public class ApiResponseWrapperFilter : IAsyncResultFilter
+public class ApiResultFilter : IAsyncResultFilter
 {
 	public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 	{

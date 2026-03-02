@@ -20,8 +20,8 @@ public partial class UserToUserDtoMapper : MapperBase<IdentityUser, UserDto>
 
 	[MapperIgnoreTarget(nameof(UserDto.Gender))]
 	[MapperIgnoreTarget(nameof(UserDto.Description))]
-	[MapperIgnoreTarget(nameof(UserDto.CreatedBy))]
-	[MapperIgnoreTarget(nameof(UserDto.LastModifiedBy))]
+	[MapperIgnoreTarget(nameof(UserDto.CreatorName))]
+	[MapperIgnoreTarget(nameof(UserDto.LastModifierName))]
 	[MapperIgnoreSource(nameof(IdentityUser.ExtraProperties))]
 	[MapperIgnoreSource(nameof(IdentityUser.Name))]
 	[MapperIgnoreSource(nameof(IdentityUser.Surname))]
@@ -47,8 +47,8 @@ public partial class UserToUserDtoMapper : MapperBase<IdentityUser, UserDto>
 
 	[MapperIgnoreTarget(nameof(UserDto.Gender))]
 	[MapperIgnoreTarget(nameof(UserDto.Description))]
-	[MapperIgnoreTarget(nameof(UserDto.CreatedBy))]
-	[MapperIgnoreTarget(nameof(UserDto.LastModifiedBy))]
+	[MapperIgnoreTarget(nameof(UserDto.CreatorName))]
+	[MapperIgnoreTarget(nameof(UserDto.LastModifierName))]
 	[MapperIgnoreSource(nameof(IdentityUser.ExtraProperties))]
 	[MapperIgnoreSource(nameof(IdentityUser.Name))]
 	[MapperIgnoreSource(nameof(IdentityUser.Surname))]
@@ -76,8 +76,8 @@ public partial class UserToUserDtoMapper : MapperBase<IdentityUser, UserDto>
 	{
 		target.Gender = source.GetProperty<Gender>("Gender");
 		target.Description = source.GetProperty<string>("Description") ?? string.Empty;
-		target.CreatedBy = GetUserName(source.CreatorId);
-		target.LastModifiedBy = GetUserName(source.LastModifierId);
+		target.CreatorName = GetUserName(source.CreatorId);
+		target.LastModifierName = GetUserName(source.LastModifierId);
 	}
 
 	private string? GetUserName(Guid? userId)

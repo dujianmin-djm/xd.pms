@@ -14,6 +14,9 @@ using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using XD.Pms.ApiKeys;
+using XD.Pms.BaseData.Departments;
+using XD.Pms.BaseData.Employees;
+using XD.Pms.BaseData.Positions;
 using XD.Pms.Books;
 using XD.Pms.EntityFrameworkCore.EntityTypeConfigurations;
 
@@ -27,6 +30,10 @@ public class PmsDbContext : AbpDbContext<PmsDbContext>, IIdentityDbContext
 
     public DbSet<Book> Books { get; set; }
 	public DbSet<ApiKey> ApiKeys { get; set; }
+	public DbSet<Department> Departments { get; set; }
+	public DbSet<Position> Positions { get; set; }
+	public DbSet<Employee> Employees { get; set; }
+	public DbSet<EmployeePosition> EmployeePositions { get; set; }
 
 	#region Entities from the modules
 
@@ -83,5 +90,9 @@ public class PmsDbContext : AbpDbContext<PmsDbContext>, IIdentityDbContext
         });
 
 		builder.ApplyConfiguration(new ApiKeyConfiguration());
+		builder.ApplyConfiguration(new DepartmentConfiguration());
+		builder.ApplyConfiguration(new PositionConfiguration());
+		builder.ApplyConfiguration(new EmployeeConfiguration());
+		builder.ApplyConfiguration(new EmployeePositionConfiguration());
 	}
 }

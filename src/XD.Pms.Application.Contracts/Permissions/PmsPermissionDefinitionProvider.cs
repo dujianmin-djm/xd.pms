@@ -40,6 +40,33 @@ public class PmsPermissionDefinitionProvider : PermissionDefinitionProvider
 		books.AddChild(PmsPermissions.BaseData.Books.Update, L("Permission:Update"));
 		books.AddChild(PmsPermissions.BaseData.Books.Delete, L("Permission:Delete"));
 
+		var depts = basedataGroup.AddPermission(PmsPermissions.BaseData.Departments.Default, L("Permission:Departments"));
+		depts.AddChild(PmsPermissions.BaseData.Departments.Create, L("Permission:Create"));
+		depts.AddChild(PmsPermissions.BaseData.Departments.Update, L("Permission:Update"));
+		depts.AddChild(PmsPermissions.BaseData.Departments.Delete, L("Permission:Delete"));
+		depts.AddChild(PmsPermissions.BaseData.Departments.Submit, L("Permission:Submit"));
+		depts.AddChild(PmsPermissions.BaseData.Departments.Cancel, L("Permission:Cancel"));
+		depts.AddChild(PmsPermissions.BaseData.Departments.Audit, L("Permission:Audit"));
+		depts.AddChild(PmsPermissions.BaseData.Departments.UnAudit, L("Permission:UnAudit"));
+
+		var posts = basedataGroup.AddPermission(PmsPermissions.BaseData.Positions.Default, L("Permission:Positions"));
+		posts.AddChild(PmsPermissions.BaseData.Positions.Create, L("Permission:Create"));
+		posts.AddChild(PmsPermissions.BaseData.Positions.Update, L("Permission:Update"));
+		posts.AddChild(PmsPermissions.BaseData.Positions.Delete, L("Permission:Delete"));
+		posts.AddChild(PmsPermissions.BaseData.Positions.Submit, L("Permission:Submit"));
+		posts.AddChild(PmsPermissions.BaseData.Positions.Cancel, L("Permission:Cancel"));
+		posts.AddChild(PmsPermissions.BaseData.Positions.Audit, L("Permission:Audit"));
+		posts.AddChild(PmsPermissions.BaseData.Positions.UnAudit, L("Permission:UnAudit"));
+
+		var employees = basedataGroup.AddPermission(PmsPermissions.BaseData.Employees.Default, L("Permission:Employees"));
+		employees.AddChild(PmsPermissions.BaseData.Employees.Create, L("Permission:Create"));
+		employees.AddChild(PmsPermissions.BaseData.Employees.Update, L("Permission:Update"));
+		employees.AddChild(PmsPermissions.BaseData.Employees.Delete, L("Permission:Delete"));
+		employees.AddChild(PmsPermissions.BaseData.Employees.Submit, L("Permission:Submit"));
+		employees.AddChild(PmsPermissions.BaseData.Employees.Cancel, L("Permission:Cancel"));
+		employees.AddChild(PmsPermissions.BaseData.Employees.Audit, L("Permission:Audit"));
+		employees.AddChild(PmsPermissions.BaseData.Employees.UnAudit, L("Permission:UnAudit"));
+
 		// Business
 		var bizGroup = context.AddGroup(PmsPermissions.Business.GroupName, L("Permission:BusinessManagement"));
 

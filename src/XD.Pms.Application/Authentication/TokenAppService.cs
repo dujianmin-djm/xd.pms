@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Identity;
 using Volo.Abp.Json;
+using Volo.Abp.PermissionManagement;
 using XD.Pms.ApiResponse;
 using XD.Pms.Authentication.Dto;
 
@@ -28,6 +29,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 	private readonly TokenSettings _tokenSettings;
 	private readonly ITokenBlacklistService _tokenBlacklistService;
 	private readonly IJsonSerializer _jsonSerializer;
+	private readonly IPermissionGrantRepository _permissionGrantRepository;
 
 	public TokenAppService(
 		IHttpClientFactory httpClientFactory,
@@ -36,7 +38,8 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		IConfiguration configuration,
 		IOptions<TokenSettings> tokenSettings,
 		ITokenBlacklistService tokenBlacklistService,
-		IJsonSerializer jsonSerializer)
+		IJsonSerializer jsonSerializer,
+		IPermissionGrantRepository permissionGrantRepository)
 	{
 		_httpClientFactory = httpClientFactory;
 		_httpContextAccessor = httpContextAccessor;
@@ -45,6 +48,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		_tokenSettings = tokenSettings.Value;
 		_tokenBlacklistService = tokenBlacklistService;
 		_jsonSerializer = jsonSerializer;
+		_permissionGrantRepository = permissionGrantRepository;
 	}
 
 	/// <summary>
@@ -94,15 +98,12 @@ public class TokenAppService : PmsAppService, ITokenAppService
 	public async Task RevokeTokenAsync(string? token = null)
 	{
 		var accessToken = token ?? GetCurrentAccessToken();
-
 		if (string.IsNullOrEmpty(accessToken))
 		{
 			return;
 		}
 
-		// 解析 Token 获取 JTI 和过期时间
 		var (jti, expiration) = ParseTokenInfo(accessToken);
-
 		if (!string.IsNullOrEmpty(jti) && expiration.HasValue)
 		{
 			await _tokenBlacklistService.AddToBlacklistAsync(jti, expiration.Value);
@@ -125,7 +126,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		}
 		catch
 		{
-			// 忽略撤销失败
+			
 		}
 	}
 
@@ -145,6 +146,16 @@ public class TokenAppService : PmsAppService, ITokenAppService
 
 		var roles = await _userManager.GetRolesAsync(user);
 
+		var grantedPermissions = new List<string>();
+		foreach (var roleName in roles)
+		{
+			var permissions = await _permissionGrantRepository.GetListAsync(
+				providerName: "R",
+				providerKey: roleName
+			);
+			grantedPermissions.AddRange(permissions.Distinct().Select(p => p.Name));
+		}
+
 		return new UserInfoDto
 		{
 			Id = user.Id,
@@ -152,7 +163,7 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			Email = user.Email,
 			PhoneNumber = user.PhoneNumber,
 			Roles = [.. roles],
-			Buttons = []
+			Permissions = grantedPermissions
 		};
 	}
 
@@ -227,7 +238,6 @@ public class TokenAppService : PmsAppService, ITokenAppService
 	{
 		return (error, operation, description) switch
 		{
-			// ==================== 登录场景 ====================
 			("account_locked", "login", _)
 				=> (ApiResponseCode.AccountLocked, L["Auth:AccountLocked"].Value),
 
@@ -237,7 +247,6 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			("invalid_grant", "login", _)
 				=> (ApiResponseCode.InvalidCredentials, L["Auth:InvalidCredentials"].Value),
 
-			// ==================== 刷新 Token 场景 ====================
 			("invalid_grant", "refresh", "The specified refresh token is no longer valid.")
 				=> (ApiResponseCode.RefreshTokenExpired, L["Auth:RefreshTokenExpired"].Value),
 
@@ -247,13 +256,11 @@ public class TokenAppService : PmsAppService, ITokenAppService
 			("invalid_grant", "refresh", _)
 				=> (ApiResponseCode.RefreshTokenInvalid, L["Auth:RefreshTokenInvalid"].Value),
 
-			// ==================== 其他错误 ====================
 			("invalid_client", _, _)
 				=> (ApiResponseCode.BadRequest, description ?? L["Auth:ClientConfigError"].Value),
 
 			("invalid_scope", _, _) => (ApiResponseCode.BadRequest, description ?? L["Auth:InvalidScope"].Value),
 
-			// 默认错误
 			_ => (ApiResponseCode.Forbidden, $"{error}: {description}" ?? L["Auth:AuthenticationFailed"].Value)
 		};
 	}
@@ -276,8 +283,6 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		}
 	}
 
-
-	#region 辅助类
 
 	private class OpenIddictTokenResponse
 	{
@@ -308,6 +313,4 @@ public class TokenAppService : PmsAppService, ITokenAppService
 		[JsonPropertyName("error_uri")]
 		public string? ErrorUri { get; set; }
 	}
-
-	#endregion
 }

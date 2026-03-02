@@ -47,6 +47,42 @@ public static class PmsPermissions
 			public const string Update = Default + ".Update";
 			public const string Delete = Default + ".Delete";
 		}
+
+		public static class Departments
+		{
+			public const string Default = GroupName + ".Departments";
+			public const string Create = Default + ".Create";
+			public const string Update = Default + ".Update";
+			public const string Delete = Default + ".Delete";
+			public const string Submit = Default + ".Submit";
+			public const string Cancel = Default + ".Cancel";
+			public const string Audit = Default + ".Audit";
+			public const string UnAudit = Default + ".UnAudit";
+		}
+
+		public static class Positions
+		{
+			public const string Default = GroupName + ".Positions";
+			public const string Create = Default + ".Create";
+			public const string Update = Default + ".Update";
+			public const string Delete = Default + ".Delete";
+			public const string Submit = Default + ".Submit";
+			public const string Cancel = Default + ".Cancel";
+			public const string Audit = Default + ".Audit";
+			public const string UnAudit = Default + ".UnAudit";
+		}
+
+		public static class Employees
+		{
+			public const string Default = GroupName + ".Employees";
+			public const string Create = Default + ".Create";
+			public const string Update = Default + ".Update";
+			public const string Delete = Default + ".Delete";
+			public const string Submit = Default + ".Submit";
+			public const string Cancel = Default + ".Cancel";
+			public const string Audit = Default + ".Audit";
+			public const string UnAudit = Default + ".UnAudit";
+		}
 	}
 
 	public static class Business

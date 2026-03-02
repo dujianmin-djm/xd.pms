@@ -113,6 +113,28 @@
     "Permission:Delete": "删除",
     "Permission:ChangePermissions": "更改权限",
     "Permission:ManageRoles": "管理角色",
-    "Permission:ResetPassword": "重置密码"
+    "Permission:ResetPassword": "重置密码",
+    "Permission:Submit": "提交",
+    "Permission:Cancel": "撤销",
+    "Permission:Audit": "审核",
+    "Permission:UnAudit": "反审核",
+    "Permission:Departments": "部门管理",
+    "Permission:Positions": "岗位管理",
+    "Permission:Employees": "员工管理",
+
+    "Pms:DocumentNotEditable": "单据非「创建」状态，不允许编辑",
+    "Pms:DocumentCannotDelete": "单据非「创建」状态，不允许删除",
+    "Pms:DocumentCannotSubmit": "只有「创建」状态的单据才能提交",
+    "Pms:DocumentCannotAudit": "只有「审核中」状态的单据才能审核",
+    "Pms:DocumentCannotUnAudit": "只有「已审核」状态的单据才能反审核",
+    "Pms:DuplicateNumber": "编码 {Number} 已存在",
+    "Pms:DepartmentParentNotFound": "上级部门不存在",
+    "Pms:DepartmentCannotDeleteHasChildren": "该部门下存在子部门，不允许删除",
+    "Pms:DepartmentCannotDeleteReferenced": "该部门已被岗位引用，不允许删除",
+    "Pms:DepartmentCannotSetSelfAsParent": "不能将自身设置为上级部门",
+    "Pms:PositionDepartmentNotFound": "所属部门不存在",
+    "Pms:EmployeePositionNotFound": "员工岗位不存在",
+    "Pms:EmployeeMultiplePrimary": "只能有一个主任岗",
+    "Pms:EmployeeNoPrimary": "至少设置一个主任岗"
   }
 }

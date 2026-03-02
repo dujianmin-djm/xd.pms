@@ -74,12 +74,12 @@ public class PmsHttpApiHostModule : AbpModule
 		{
 			builder.AddValidation(options =>
 			{
-				/* 微服务架构（API 网关 + 单独认证服务）可以配置单独指向 AuthServer 的授权服务器 
+				/* 微服务架构可以配置单独指向 AuthServer 的授权服务器（API 网关 + 单独认证服务）
 				 * 须同时启用 app.UseAbpOpenIddictValidation(); 用于远程令牌验证
 				 * options.SetIssuer(configuration["AuthServer:Authority"]!);
 				 */
 				options.AddAudiences("Pms");
-				options.UseLocalServer();	//本地验证，不需要指向授权服务器
+				options.UseLocalServer();
 				options.UseAspNetCore();
 
 				// 添加事件验证处理器
@@ -148,7 +148,7 @@ public class PmsHttpApiHostModule : AbpModule
 		
 		Configure<MvcOptions>(options =>
 		{
-			options.Filters.Add<ApiResponseWrapperFilter>();
+			options.Filters.Add<ApiResultFilter>();
 		});
 
 		Configure<AbpAntiForgeryOptions>(options =>

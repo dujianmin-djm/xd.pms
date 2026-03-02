@@ -19,6 +19,6 @@ public class UserDto : FullAuditedEntityDto<Guid>, IHasConcurrencyStamp
 	public string ConcurrencyStamp { get; set; } = default!;
 	public DateTimeOffset? LastPasswordChangeTime { get; set; }
 	public DateTimeOffset? LastSignInTime { get; set; }
-	public string? CreatedBy { get; set; }
-	public string? LastModifiedBy { get; set; }
+	public string? CreatorName { get; set; }
+	public string? LastModifierName { get; set; }
 }

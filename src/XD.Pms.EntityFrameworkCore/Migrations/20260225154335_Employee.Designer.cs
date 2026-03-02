@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 using XD.Pms.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using XD.Pms.EntityFrameworkCore;
 namespace XD.Pms.Migrations
 {
     [DbContext(typeof(PmsDbContext))]
-    partial class PmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260225154335_Employee")]
+    partial class Employee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
