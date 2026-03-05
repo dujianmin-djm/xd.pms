@@ -55,7 +55,7 @@ namespace XD.Pms;
 	typeof(PmsEntityFrameworkCoreModule),
 	typeof(AbpAutofacModule),
 	typeof(AbpDistributedLockingModule),
-	//typeof(AbpCachingStackExchangeRedisModule), // 取消 Redis 缓存
+	//typeof(AbpCachingStackExchangeRedisModule),
 	typeof(AbpIdentityAspNetCoreModule),
 	typeof(AbpOpenIddictAspNetCoreModule),
 	//typeof(AbpAccountWebOpenIddictModule),
@@ -69,7 +69,6 @@ public class PmsHttpApiHostModule : AbpModule
 		var hostingEnvironment = context.Services.GetHostingEnvironment();
 		var configuration = context.Services.GetConfiguration();
 
-		// 配置 OpenIddict 验证
 		PreConfigure<OpenIddictBuilder>(builder =>
 		{
 			builder.AddValidation(options =>
@@ -82,7 +81,7 @@ public class PmsHttpApiHostModule : AbpModule
 				options.UseLocalServer();
 				options.UseAspNetCore();
 
-				// 添加事件验证处理器
+				// 添加验证事件处理器
 				options.AddEventHandler(TokenValidationHandler.Descriptor);
 				//options.AddEventHandler(TokenBlacklistValidationHandler.Descriptor);
 			});
@@ -206,10 +205,10 @@ public class PmsHttpApiHostModule : AbpModule
 					UIQueryStringKey = "lang"
 				});
 
-				// 3. Cookie （保留 ABP Web UI 功能）
+				// 2. Cookie （保留 ABP Web UI 功能）
 				providers.Add(cookieProvider ?? new CookieRequestCultureProvider());
 
-				// 4. Accept-Language 请求头
+				// 3. Accept-Language 请求头
 				providers.Add(new AcceptLanguageHeaderRequestCultureProvider());
 
 				// 如果所有 Provider 都没有匹配，将使用 DefaultRequestCulture

@@ -106,6 +106,21 @@
     "Permission:UnAudit": "UnAudit",
     "Permission:Departments": "Department management",
     "Permission:Positions": "Position management",
-    "Permission:Employees": "Employee management"
+    "Permission:Employees": "Employee management",
+
+    "Pms:DocumentNotEditable": "Document is not in 'Created' status and cannot be edited.",
+    "Pms:DocumentCannotDelete": "Document is not in 'Created' status and cannot be deleted.",
+    "Pms:DocumentCannotSubmit": "Only documents in 'Created' status can be submitted.",
+    "Pms:DocumentCannotAudit": "Only documents in 'Auditing' status can be audited.",
+    "Pms:DocumentCannotUnAudit": "Only documents in 'Audited' status can be unaudited.",
+    "Pms:DuplicateNumber": "Code {Number} already exists.",
+    "Pms:DepartmentParentNotFound": "Parent department does not exist.",
+    "Pms:DepartmentCannotDeleteHasChildren": "The department has child departments and cannot be deleted.",
+    "Pms:DepartmentCannotDeleteReferenced": "The department is referenced by a position and cannot be deleted.",
+    "Pms:DepartmentCannotSetSelfAsParent": "Cannot set itself as the parent department.",
+    "Pms:PositionDepartmentNotFound": "The department does not exist.",
+    "Pms:EmployeePositionNotFound": "Employee position not found.",
+    "Pms:EmployeeMultiplePrimary": "Only one primary position is allowed.",
+    "Pms:EmployeeNoPrimary": "At least one primary position must be set."
   }
 }

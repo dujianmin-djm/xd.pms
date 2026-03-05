@@ -67,9 +67,9 @@ public class EfCoreDepartmentRepository : EfCoreRepository<PmsDbContext, Departm
 		return result;
 	}
 
-	private void CollectDescendants(List<Department> all, Guid parentId, List<Department> result)
+	private static void CollectDescendants(List<Department> all, Guid parentId, List<Department> result)
 	{
-		var children = all.Where(d => d.ParentId == parentId).ToList();
+		var children = all.Where(d => d.ParentId == parentId);
 		foreach (var child in children)
 		{
 			result.Add(child);

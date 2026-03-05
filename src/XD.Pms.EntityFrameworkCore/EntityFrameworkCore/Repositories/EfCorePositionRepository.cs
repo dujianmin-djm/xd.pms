@@ -23,9 +23,13 @@ public class EfCorePositionRepository : EfCoreRepository<PmsDbContext, Position,
 		return await (await GetDbSetAsync()).FirstOrDefaultAsync(p => p.Number == number);
 	}
 
-	public async Task<List<Position>> GetAllAsync()
+	public async Task<List<Position>> GetAllAsync(Guid? departmentId = null)
 	{
-		return await (await GetDbSetAsync()).Include(p => p.Department).OrderBy(p => p.Number).ToListAsync();
+		return await (await GetDbSetAsync())
+			.Include(p => p.Department)
+			.WhereIf(departmentId.HasValue, p => p.DepartmentId == departmentId)
+			.OrderBy(p => p.Number)
+			.ToListAsync();
 	}
 
 	public async Task<List<Position>> GetListAsync(

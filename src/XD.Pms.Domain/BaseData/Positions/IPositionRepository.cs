@@ -10,7 +10,7 @@ namespace XD.Pms.BaseData.Positions;
 public interface IPositionRepository : IRepository<Position, Guid>
 {
 	Task<Position?> FindByNumberAsync(string number);
-	Task<List<Position>> GetAllAsync();
+	Task<List<Position>> GetAllAsync(Guid? departmentId = null);
 	Task<List<Position>> GetListAsync(
 		string? number, 
 		string? name, 

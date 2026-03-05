@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Data;
 using XD.Pms.BaseData.Positions;
@@ -56,9 +55,7 @@ public class PositionAppService : PmsAppService, IPositionAppService
 	[HttpGet("lookup")]
 	public async Task<List<PositionLookupDto>> GetLookupAsync([FromQuery] Guid? departmentId = null)
 	{
-		var list = await _positionRepository.GetAllAsync();
-		if (departmentId.HasValue)
-			list = list.Where(p => p.DepartmentId == departmentId.Value).ToList();
+		var list = await _positionRepository.GetAllAsync(departmentId);
 		return ObjectMapper.Map<List<Position>, List<PositionLookupDto>>(list);
 	}
 
