@@ -3,6 +3,15 @@
 
 本仓库是系统后端，关键词 RESTful API、SQL Server、EF Core。已实现用户管理、角色管理、员工、岗位、部门等模块的 CRUD 接口，并完成 JWT 认证、权限列表返回等功能，配套前端（soybean-admin）使用。[前端仓库地址](https://github.com/dujianmin-djm/soybean)。（仓库的Web层项目未使用可删除）
 
+## 示例图片
+
+<img width="1899" height="875" alt="abp0" src="https://github.com/user-attachments/assets/7348e87c-85dd-4516-955c-ded1455921c4" />
+<img width="1899" height="869" alt="abp1" src="https://github.com/user-attachments/assets/02e39f03-d899-4d31-92f2-e11c827d186f" />
+<img width="1905" height="878" alt="abp2" src="https://github.com/user-attachments/assets/222f3a0a-c370-46f7-bfef-5fff46706a15" />
+<img width="1893" height="880" alt="abp3" src="https://github.com/user-attachments/assets/12d9083e-3b67-419d-8ffb-8eac9528bb43" />
+<img width="1906" height="879" alt="abp4" src="https://github.com/user-attachments/assets/ff6da56c-2c31-4f97-8953-ce31698db175" />
+
+
 ## 关于解决方案
 
 这是一个基于[领域驱动设计（DDD）](https://abp.io/docs/latest/framework/architecture/domain-driven-design)实践的分层启动解决方案。所有基本的ABP模块均已安装。使用本仓库代码需要对ABP框架有一定的了解，如需更多信息，请查阅[应用启动模板](https://abp.io/docs/latest/solution-templates/layered-web-application)文档。
