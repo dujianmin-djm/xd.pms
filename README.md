@@ -1,12 +1,15 @@
 ﻿# XD.Pms
+ 项目是一套完整的企业级后台管理解决方案，前后端分离的SPA应用。前端采用 Vue 3 + TypeScript + Vite 技术栈，基于 [soybean-admin](https://github.com/soybeanjs/soybean-admin) 进行二次开发；后端采用 .NET 技术栈，基于 [ABP Framework](https://github.com/abpframework/abp) 实现领域驱动设计，提供 RESTful API 接口。
+
+本仓库是系统后端，关键词 RESTful API、SQL Server、EF Core。已实现用户管理、角色管理、员工、岗位、部门等模块的 CRUD 接口，并完成 JWT 认证、权限列表返回等功能，配套前端（soybean-admin）使用。[前端仓库地址](https://github.com/dujianmin-djm/soybean)。（仓库的Web层项目未使用可删除）
 
 ## About this solution
 
-This is a layered startup solution based on [Domain Driven Design (DDD)](https://abp.io/docs/latest/framework/architecture/domain-driven-design) practises. All the fundamental ABP modules are already installed. Check the [Application Startup Template](https://abp.io/docs/latest/solution-templates/layered-web-application) documentation for more info.
+这是一个基于[领域驱动设计（DDD）](https://abp.io/docs/latest/framework/architecture/domain-driven-design)实践的分层启动解决方案。所有基本的ABP模块均已安装。使用本仓库代码需要对ABP框架有一定的了解，如需更多信息，请查阅[应用启动模板](https://abp.io/docs/latest/solution-templates/layered-web-application)文档。
 
 ### Pre-requirements
 
-* [.NET9.0+ SDK](https://dotnet.microsoft.com/download/dotnet)
+* [.NET10.0 SDK](https://dotnet.microsoft.com/download/dotnet)
 * [Node v18 or 20](https://nodejs.org/en)
 
 ### Configurations
