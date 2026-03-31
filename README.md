@@ -48,7 +48,7 @@ dotnet dev-certs https -v -ep openiddict.pfx -p a048bd79-c2f6-4a46-9067-12f0a06a
 
 * `XD.Pms.DbMigrator`: 一个控制台应用程序，用于应用迁移并初始化数据。它在开发环境和生产环境中都很有用。
 * `XD.Pms.HttpApi.Host`: 一个ASP.NET Core Web应用程序，作为HTTP API的宿主（非ABP框架自带，自定义用于提供RESTful API），它包含了所需的基础设施配置（如依赖注入、中间件配置等）。
-* `XD.Pms.Web`: 这是一个基于ASP.NET Core MVC和Razor Pages的应用程序，是该解决方案中必不可少的Web应用程序（ABP框架自带，本项目生产环境未用，仅用于测试，可删除）。
+* `XD.Pms.Web`: 这是一个基于ASP.NET Core MVC和Razor Pages的Web应用程序（ABP框架自带，本项目生产环境未用，仅用于测试OAuth2，可删除）。
 
 
 ## 部署应用程序
