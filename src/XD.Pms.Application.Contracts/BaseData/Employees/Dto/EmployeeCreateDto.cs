@@ -28,5 +28,5 @@ public class EmployeeCreateDto
 	[MaxLength(256)]
 	public string? Address { get; set; }
 
-	public List<EmployeePositionEditDto> Positions { get; set; } = [];
+	public List<EmployeePositionCreateOrUpdateDto> Positions { get; set; } = [];
 }

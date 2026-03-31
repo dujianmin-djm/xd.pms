@@ -1,7 +1,7 @@
 ﻿# XD.Pms
  项目是一套完整的企业级后台管理解决方案，前后端分离的SPA应用。前端采用 Vue 3 + TypeScript + Vite 技术栈，基于 [soybean-admin](https://github.com/soybeanjs/soybean-admin) 进行二次开发；后端采用 .NET 技术栈，基于 [ABP Framework](https://github.com/abpframework/abp) 实现领域驱动设计，提供 RESTful API 接口。
 
-本仓库是系统后端，关键词 RESTful API、SQL Server、EF Core。已实现用户管理、角色管理、员工、岗位、部门等模块的 CRUD 接口，并完成 JWT 认证、权限列表返回等功能，配套前端（soybean-admin）使用。[前端仓库地址](https://github.com/dujianmin-djm/soybean)。（仓库的Web层项目未使用可删除）
+本仓库是系统后端，关键词 RESTful API、SQL Server、EF Core。已实现用户管理、角色管理、员工、岗位、部门等模块的 CRUD 接口，并完成 JWT 认证、权限列表返回等功能，配套前端（soybean-admin）使用。[前端仓库地址](https://github.com/dujianmin-djm/soybean)。
 
 ## 示例图片
 

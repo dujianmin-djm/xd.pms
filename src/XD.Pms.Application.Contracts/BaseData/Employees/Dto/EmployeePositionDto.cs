@@ -13,7 +13,7 @@ public class EmployeePositionDto : EntityDto<Guid>
 	public bool IsPrimary { get; set; }
 }
 
-public class EmployeePositionEditDto
+public class EmployeePositionCreateOrUpdateDto
 {
 	public Guid? Id { get; set; }
 	public Guid DepartmentId { get; set; }

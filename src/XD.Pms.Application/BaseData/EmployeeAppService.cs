@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Data;
@@ -30,7 +31,7 @@ public class EmployeeAppService : PmsAppService, IEmployeeAppService
 	{
 		var entity = await _employeeRepository.GetWithDetailsAsync(id)
 					 ?? throw new EntityNotFoundException(typeof(Employee), id);
-		return MapToDto(entity);
+		return ObjectMapper.Map<Employee, EmployeeDto>(entity);
 	}
 
 	[HttpGet("query")]
@@ -43,7 +44,7 @@ public class EmployeeAppService : PmsAppService, IEmployeeAppService
 		long total = await _employeeRepository.GetCountAsync(
 			input.Number, input.Name, input.Gender, input.Phone, input.DocumentStatus);
 
-		var dtos = list.Select(MapToDto).ToList();
+		var dtos = ObjectMapper.Map<List<Employee>, List<EmployeeDto>>(list);
 
 		return new PagedResponseDto<EmployeeDto>(total, dtos)
 		{
@@ -71,7 +72,7 @@ public class EmployeeAppService : PmsAppService, IEmployeeAppService
 		);
 
 		await _employeeRepository.InsertAsync(entity, autoSave: true);
-		return MapToDto(entity);
+		return ObjectMapper.Map<Employee, EmployeeDto>(entity);
 	}
 
 	[HttpPut("edit/{id}")]
@@ -94,7 +95,7 @@ public class EmployeeAppService : PmsAppService, IEmployeeAppService
 		);
 
 		await _employeeRepository.UpdateAsync(entity, autoSave: true);
-		return MapToDto(entity);
+		return ObjectMapper.Map<Employee, EmployeeDto>(entity);
 	}
 
 	[HttpDelete("delete/{id}")]
@@ -140,27 +141,5 @@ public class EmployeeAppService : PmsAppService, IEmployeeAppService
 		var entity = await _employeeRepository.GetAsync(id);
 		entity.UnAudit();
 		await _employeeRepository.UpdateAsync(entity, autoSave: true);
-	}
-
-	/* ── 映射辅助 ── */
-	private EmployeeDto MapToDto(Employee entity)
-	{
-		var dto = ObjectMapper.Map<Employee, EmployeeDto>(entity);
-		dto.Positions = entity.Positions
-			.Select(pa => new EmployeePositionDto
-			{
-				Id = pa.Id,
-				DepartmentId = pa.DepartmentId,
-				DepartmentName = pa.Department?.Name,
-				PositionId = pa.PositionId,
-				PositionName = pa.Position?.Name,
-				StartDate = pa.StartDate,
-				IsPrimary = pa.IsPrimary
-			}).ToList();
-
-		var primary = dto.Positions.FirstOrDefault(pa => pa.IsPrimary);
-		dto.PrimaryDepartmentName = primary?.DepartmentName;
-		dto.PrimaryPositionName = primary?.PositionName;
-		return dto;
 	}
 }
