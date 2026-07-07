@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/XD.Pms.Application.Contracts/XD.Pms.Application.Contracts.csproj" />
+    <Project Path="src/XD.Pms.Application/XD.Pms.Application.csproj" />
+    <Project Path="src/XD.Pms.DbMigrator/XD.Pms.DbMigrator.csproj" />
+    <Project Path="src/XD.Pms.Domain.Shared/XD.Pms.Domain.Shared.csproj" />
+    <Project Path="src/XD.Pms.Domain/XD.Pms.Domain.csproj" />
+    <Project Path="src/XD.Pms.EntityFrameworkCore/XD.Pms.EntityFrameworkCore.csproj" />
+    <Project Path="src/XD.Pms.HttpApi.Client/XD.Pms.HttpApi.Client.csproj" />
+    <Project Path="src/XD.Pms.HttpApi.Host/XD.Pms.HttpApi.Host.csproj">
+      <BuildDependency Project="src/XD.Pms.Application/XD.Pms.Application.csproj" />
+      <BuildDependency Project="src/XD.Pms.EntityFrameworkCore/XD.Pms.EntityFrameworkCore.csproj" />
+      <BuildDependency Project="src/XD.Pms.HttpApi/XD.Pms.HttpApi.csproj" />
+    </Project>
+    <Project Path="src/XD.Pms.HttpApi/XD.Pms.HttpApi.csproj" />
+    <Project Path="src/XD.Pms.Web/XD.Pms.Web.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/XD.Pms.Application.Tests/XD.Pms.Application.Tests.csproj" />
+    <Project Path="test/XD.Pms.Domain.Tests/XD.Pms.Domain.Tests.csproj" />
+    <Project Path="test/XD.Pms.EntityFrameworkCore.Tests/XD.Pms.EntityFrameworkCore.Tests.csproj" />
+    <Project Path="test/XD.Pms.HttpApi.Client.ConsoleTestApp/XD.Pms.HttpApi.Client.ConsoleTestApp.csproj" />
+    <Project Path="test/XD.Pms.TestBase/XD.Pms.TestBase.csproj" />
+    <Project Path="test/XD.Pms.Web.Tests/XD.Pms.Web.Tests.csproj" />
+  </Folder>
+</Solution>

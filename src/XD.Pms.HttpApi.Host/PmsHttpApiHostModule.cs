@@ -348,6 +348,7 @@ public class PmsHttpApiHostModule : AbpModule
 			options.SwaggerDoc("v1", new OpenApiInfo { Title = "Pms API", Version = "v1", Description = "" });
 			options.DocInclusionPredicate((docName, description) => true);
 			options.CustomSchemaIds(type => type.FullName);
+			options.HideAbpEndpoints();
 
 			options.AddSecurityDefinition("OAuth2", new OpenApiSecurityScheme
 			{

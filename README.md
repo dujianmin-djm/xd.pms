@@ -62,7 +62,7 @@ dotnet dev-certs https -v -ep openiddict.pfx -p a048bd79-c2f6-4a46-9067-12f0a06a
 
 ## 部署应用程序
 
-部署ABP应用程序的过程与部署任何.NET或ASP.NET Core应用程序的过程相同。但是，有一些重要的注意事项需要牢记。如需详细指导，请参阅ABP的[部署文档](https://abp.io/docs/latest/Deployment/Index).
+部署ABP应用程序的过程与部署任何.NET或ASP.NET Core应用程序的过程相同。但是，有一些重要的注意事项需要牢记。如需详细指导，请参阅ABP的[部署文档](https://abp.io/docs/latest/Deployment/Index)。
 
 ### 额外资源
 
